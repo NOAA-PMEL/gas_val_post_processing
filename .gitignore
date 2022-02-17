@@ -1,0 +1,8 @@
+**/data
+**/.venv
+*.pyc
+bigD_parsed_from_val_file.json
+mode_and_gas_parsed_from_val_file.json
+mode_and_gas_stuff_from_val_file.json
+other_stuff_from_val_file.json
+scratchwork.py
