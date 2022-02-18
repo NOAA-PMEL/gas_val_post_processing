@@ -1,3 +1,6 @@
+"""
+@author: nespeca
+"""
 from matplotlib.pyplot import title
 from reportlab.lib.enums import TA_JUSTIFY, TA_CENTER
 from reportlab.lib.pagesizes import letter
@@ -252,7 +255,6 @@ def myLaterPages(canvas, doc):
     pageinfo = "ASVCO2 Gas Val. - v0.0.6"
     canvas.drawString(inch, 0.75 * inch, "Page %d, %s" % (doc.page, pageinfo))
     canvas.restoreState()
-
 
 def myFirstPage(canvas, doc):
     canvas.saveState()
@@ -1691,7 +1693,7 @@ def generate_bigger_validation_report_reordered_Feb_2022(output_folder,sn,date_r
     document = []
     
     PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    ##### 1st page #####
+    ##### 1st page (and second page) #####
     document.append(Image(PROJECT_ROOT + '/code/post_processing/config/ASVCO2_logo.png',3.87*inch,1.06*inch))
     #document.append(Spacer(6*inch,0.25*inch))
     document.append(Paragraph('Gas Validation for ASVCO2 Gen2, Serial Number: ' + sn,\
@@ -1755,9 +1757,12 @@ def generate_bigger_validation_report_reordered_Feb_2022(output_folder,sn,date_r
         '''
     elif ( comparison_type == 'separate'):
         fifth_page_text_above_fifth_page_table='''
-        The ASVCO2 unit is credited with a passing result if the mean and the standard deviation
-        of the residual are within their separate limits in ppm. Otherwise, it is determined that 
-        the ASVCO2 unit has failed the test. This is shown in the table below.
+        The ASVCO2 unit is credited with a passing result if the mean, maximum and 
+        the standard deviation of the residual are within their separate limits in ppm. 
+        Additionally, the mean residuals from gas standards in the range of 0ppm through 750ppm
+        must fall within acceptable limits after taking into account the 95% confidence interval
+        of the mean with a limited sample size. Otherwise, it is determined that the ASVCO2 unit 
+        has failed the test. This is shown in the table below.
         '''
     else:
         fifth_page_text_above_fifth_page_table = '''An undefined pass/fail criterion has been chosen
@@ -1769,113 +1774,8 @@ def generate_bigger_validation_report_reordered_Feb_2022(output_folder,sn,date_r
     document.append(Paragraph('APOFF Recalculated (recalc) Pass/Fail results:'))
     document.append(Spacer(6*inch,0.1*inch))
 
-    # # calculate whether or not the results will pass or fail and store the result in df_mean_stdev_tcorr_2
-    # #df_mean_stdev_tcorr_2 = calculate_pf_df(df_mean_stdev_tcorr,n_std_dev)
-    # #df_mean_stdev_tcorr_2 = calculate_pf_df(tuple_of_df_4_tables[0],n_std_dev)
-    # df_mean_stdev_max_tcorr_2 = calculate_pf_df_v2(tuple_of_df_4_tables[0],'Tcorr')
-    
-    # # convert dataframe to 2-D array, data2, with pass/fail criteria
-    # num_rows=len(df_mean_stdev_max_tcorr_2)
-    # num_cols=len(df_mean_stdev_max_tcorr_2.columns)
-    # data_pf_APOFF_recalc=[]
-    # if ( comparison_type == 'combined' ):
-    #     header = [s.replace("_"," ") for s in df_mean_stdev_tcorr_2.columns.values]
-    # elif ( comparison_type == 'separate' ):
-    #     header=['gas_standard_group','dry_mean','mean_upper_limit','mean_pass_or_fail',\
-    #         'dry_stdev','stdev_upper_limit','stdev_pass_or_fail',\
-    #         'dry_max','max_upper_limit','max_pass_or_fail']
-    #     header = [s.replace("_"," ") for s in header]
-    #     #reformat for multiple lines
-    #     header[0] = Paragraph('gas<br/>stanard<br/>group')
-    #     header[2] = Paragraph('mean<br/>upper<br/>limit')
-    #     header[3] = Paragraph('mean<br/>pass<br/>or fail')
-    #     header[5] = Paragraph('stdev<br/>upper<br/>limit')
-    #     header[6] = Paragraph('stdev<br/>pass<br/>or fail')
-    #     header[5] = Paragraph('stdev<br/>upper<br/>limit')
-    #     header[6] = Paragraph('stdev<br/>pass<br/>or fail')
-    #     header[8] = Paragraph('max<br/>upper<br/>limit')
-    #     header[9] = Paragraph('max<br/>upper<br/>limit')
-    # data_pf_APOFF_recalc.append(header)
-    # #print(df_mean_stdev_tcorr_2.columns)
-    # #print(df_mean_stdev_tcorr_2.columns.values)
-    # for idx, row in df_mean_stdev_max_tcorr_2.iterrows():
-    #     if (comparison_type == 'combined'):
-    #         row_as_list = [row["gas_standard"],
-    #                         f'{row["mean"]:.4f}',
-    #                         f'{row["stdev"]:.4f}',
-    #                         row["pass_or_fail"],
-    #                         f'{row["upper_limit"]:.4f}',
-    #                         f'{row["margin"]:.4f}']
-    #     elif ( comparison_type == 'separate' ):
-    #         lower_ref_gas = row["gas_standard_lower"]
-    #         upper_ref_gas = row["gas_standard_upper"]
-    #         lower_ref_gas_txt1 = f'{lower_ref_gas:.1f}ppm'
-    #         upper_ref_gas_txt2 = f'{upper_ref_gas:.1f}ppm'
-    #         row_as_list = [Paragraph(lower_ref_gas_txt1 + \
-    #                         '<br/>thru<br/>' + upper_ref_gas_txt2),
-    #                         f'{row["mean"]:.2f}',
-    #                         f'{row["mean_upper_limit"]:.2f}',
-    #                         row["mean_pass_or_fail"],
-    #                         f'{row["stdev"]:.2f}',
-    #                         f'{row["stdev_upper_limit"]:.2f}',
-    #                         row["stdev_pass_or_fail"],
-    #                             f'{row["max"]:.2f}',
-    #                         f'{row["max_upper_limit"]:.2f}',
-    #                         row["max_pass_or_fail"]]
-    #     else:
-    #         raise Exception(f'''undefined parameter {comparison_type} 
-    #         in generate_bigger_validation_report()''')
-    #     data_pf_APOFF_recalc.append(row_as_list)
-    
-    # t3=Table(data_pf_APOFF_recalc)
-    # # t2.setStyle(TableStyle([('ALIGN',(0,0),(num_cols,num_rows),'LEFT'),\
-    # #     ('TEXTCOLOR',(0,0),(num_cols,num_rows), colors.black),\
-    # #     ('TEXTCOLOR',(3,1),(3,num_rows), colors.green),\
-    # #     ('INNERGRID', (0,0), (num_cols,num_rows), 0.25, colors.black),\
-    # #     ('BOX', (0,0), (num_cols,num_rows), 0.25, colors.black)]))
-    # t3_table_style=[('ALIGN',(0,0),(num_cols,num_rows),'LEFT'),\
-    #     ('TEXTCOLOR',(0,0),(num_cols,num_rows), colors.black),\
-    #     ('INNERGRID', (0,0), (num_cols,num_rows), 0.25, colors.black),\
-    #     ('BOX', (0,0), (num_cols,num_rows), 0.25, colors.black)]
-    
-    # any_single_failure_flag=False
-    # if comparison_type == 'combined':
-    #     for idx, row in df_mean_stdev_tcorr_2.iterrows():
-    #         if row["pass_or_fail"] == "PASS":
-    #             t3_table_style.append(('TEXTCOLOR',(3,idx+1),(3,idx+1),\
-    #                 colors.green))
-    #         else:
-    #             t3_table_style.append(('TEXTCOLOR',(3,idx+1),(3,idx+1),\
-    #                 colors.red))
-    #             any_single_failure_flag=True
-    # elif comparison_type == 'separate':
-    #     for idx, row in df_mean_stdev_max_tcorr_2.iterrows():
-    #         if row["mean_pass_or_fail"] == "PASS":
-    #             t3_table_style.append(('TEXTCOLOR',(3,idx+1),(3,idx+1),\
-    #                 colors.green))
-    #         else:
-    #             t3_table_style.append(('TEXTCOLOR',(3,idx+1),(3,idx+1),\
-    #                 colors.red))
-    #             any_single_failure_flag=True
-    #     for idx, row in df_mean_stdev_max_tcorr_2.iterrows():
-    #         if row["stdev_pass_or_fail"] == "PASS":
-    #             t3_table_style.append(('TEXTCOLOR',(6,idx+1),(6,idx+1),\
-    #                 colors.green))
-    #         else:
-    #             t3_table_style.append(('TEXTCOLOR',(6,idx+1),(6,idx+1),\
-    #                 colors.red))
-    #             any_single_failure_flag=True
-    #     for idx, row in df_mean_stdev_max_tcorr_2.iterrows():
-    #         if row["max_pass_or_fail"] == "PASS":
-    #             t3_table_style.append(('TEXTCOLOR',(9,idx+1),(9,idx+1),\
-    #                 colors.green))
-    #         else:
-    #             t3_table_style.append(('TEXTCOLOR',(9,idx+1),(9,idx+1),\
-    #                 colors.red))
-    #             any_single_failure_flag=True
-
-    # t3.setStyle(t3_table_style)
-
+    # For APOFF with temperature recalculation, calculate whether or not the 
+    # results will pass or fail and convert result to reportlab table.
     t3, any_single_failure_flag = df_to_reportlab_table_with_pf(tuple_of_df_4_tables[0],\
         any_single_failure_flag,'Tcorr')
     document.append(t3)
@@ -1885,94 +1785,17 @@ def generate_bigger_validation_report_reordered_Feb_2022(output_folder,sn,date_r
     document.append(Paragraph('APOFF Pass/Fail results without recalculation (recalc):'))
     document.append(Spacer(6*inch,0.1*inch))
 
-    # calculate whether or not the results will pass or fail and store the result in df_mean_stdev_tcorr_2
-    #df_mean_stdev_not_tcorr_2 = calculate_pf_df(df_mean_stdev_not_tcorr,n_std_dev,'not_Tcorr')
-    #df_mean_stdev_not_tcorr_2 = calculate_pf_df(tuple_of_df_4_tables[1],n_std_dev,'not_Tcorr')
-    # df_mean_stdev_not_tcorr_2 = calculate_pf_df(tuple_of_df_4_tables[1],n_std_dev,\
-    #     'not_Tcorr',comparison_type)
-
-    # convert dataframe to 2-D array, data2, with pass/fail criteria
-    # num_rows=len(df_mean_stdev_not_tcorr_2)
-    # num_cols=len(df_mean_stdev_not_tcorr_2.columns)
-    # data_pf_APOFF_no_recalc=[]
-    # if ( comparison_type == 'combined' ):
-    #     header = [s.replace("_"," ") for s in df_mean_stdev_tcorr_2.columns.values]
-    # elif ( comparison_type == 'separate' ):
-    #     header=['gas_standard','dry_mean','mean_upper_limit','mean_pass_or_fail',\
-    #         'dry_stdev','stdev_upper_limit','stdev_pass_or_fail']
-    #     header = [s.replace("_"," ") for s in header]
-    #     header[2] = Paragraph('mean<br/>upper limit')
-    #     header[3] = Paragraph('mean<br/>pass or fail')
-    #     header[5] = Paragraph('stdev<br/>upper limit')
-    #     header[6] = Paragraph('stdev<br/>pass or fail')
-    # data_pf_APOFF_no_recalc.append(header)
-    # #print(df_mean_stdev_not_tcorr_2.columns)
-    # for idx, row in df_mean_stdev_not_tcorr_2.iterrows():
-    #     if (comparison_type == 'combined'):
-    #         row_as_list = [row["gas_standard"],
-    #                         f'{row["mean"]:.4f}',
-    #                         f'{row["stdev"]:.4f}',
-    #                         row["pass_or_fail"],
-    #                         f'{row["upper_limit"]:.4f}',
-    #                         f'{row["margin"]:.4f}']
-    #     elif ( comparison_type == 'separate' ):
-    #         row_as_list = [row["gas_standard"],
-    #                         f'{row["mean"]:.4f}',
-    #                         f'{row["mean_upper_limit"]:.4f}',
-    #                         row["mean_pass_or_fail"],
-    #                         f'{row["stdev"]:.4f}',
-    #                         f'{row["stdev_upper_limit"]:.4f}',
-    #                         row["stdev_pass_or_fail"]]
-    #     else:
-    #         raise Exception(f'''undefined parameter {comparison_type} 
-    #         in generate_bigger_validation_report()''')
-    #     data_pf_APOFF_no_recalc.append(row_as_list)
-    
-    # t4=Table(data_pf_APOFF_no_recalc)
-
-    # t4_table_style=[('ALIGN',(0,0),(num_cols,num_rows),'LEFT'),\
-    #     ('TEXTCOLOR',(0,0),(num_cols,num_rows), colors.black),\
-    #     ('INNERGRID', (0,0), (num_cols,num_rows), 0.25, colors.black),\
-    #     ('BOX', (0,0), (num_cols,num_rows), 0.25, colors.black)]
-   
-    # # change from df_mean_stdev_tcorr_2 to df_mean_stdev_not_tcorr_2, 7/15/2021, Pascal and Sophie
-    # if comparison_type == 'combined':
-    #     for idx, row in df_mean_stdev_not_tcorr_2.iterrows(): 
-    #         if row["pass_or_fail"] == "PASS":
-    #             t4_table_style.append(('TEXTCOLOR',(3,idx+1),(3,idx+1),\
-    #                 colors.green))
-    #         else:
-    #             t4_table_style.append(('TEXTCOLOR',(3,idx+1),(3,idx+1),\
-    #                 colors.red))
-    #             any_single_failure_flag=True
-    # elif comparison_type == 'separate':
-    #     for idx, row in df_mean_stdev_not_tcorr_2.iterrows():
-    #         if row["mean_pass_or_fail"] == "PASS":
-    #             t4_table_style.append(('TEXTCOLOR',(3,idx+1),(3,idx+1),\
-    #                 colors.green))
-    #         else:
-    #             t4_table_style.append(('TEXTCOLOR',(3,idx+1),(3,idx+1),\
-    #                 colors.red))
-    #             any_single_failure_flag=True
-    #     for idx, row in df_mean_stdev_not_tcorr_2.iterrows():
-    #         if row["stdev_pass_or_fail"] == "PASS":
-    #             t4_table_style.append(('TEXTCOLOR',(6,idx+1),(6,idx+1),\
-    #                 colors.green))
-    #         else:
-    #             t4_table_style.append(('TEXTCOLOR',(6,idx+1),(6,idx+1),\
-    #                 colors.red))
-    #             any_single_failure_flag=True
-
-    # t4.setStyle(t4_table_style)
-
+    # For APOFF without temperature recalculation (dry values), calculate whether or not the 
+    # results will pass or fail and convert result to reportlab table.
     t4, any_single_failure_flag = df_to_reportlab_table_with_pf(tuple_of_df_4_tables[1],\
         any_single_failure_flag,'not_Tcorr')
     document.append(t4)
 
     document.append(PageBreak())
-    ##### End of 1st page content, previously 5th page content #####
+    ##### End of Xst page content, previously 5th page content #####
 
-    ##### 2nd Page, previously 6th page content #####
+    ##### Xnd Page, previously 6th page content #####
+    ##### Begin EPOFF stuff #####
     document.append(Paragraph('EPOFF Pass/Fail Determination for ASVCO2 Gen2, Serial Number: ' + sn,\
         ParagraphStyle(name='Title',fontSize=14)))
     document.append(Spacer(6*inch,0.1*inch))
@@ -2021,9 +1844,12 @@ def generate_bigger_validation_report_reordered_Feb_2022(output_folder,sn,date_r
         '''
     elif ( comparison_type == 'separate'):
         sixth_page_text_above_sixth_page_table='''
-        The ASVCO2 unit is credited with a passing result if the mean and the standard deviation
-        of the residual are within their separate limits in ppm. Otherwise, it is determined that 
-        the ASVCO2 unit has failed the test. This is shown in the table below.
+        The ASVCO2 unit is credited with a passing result if the mean, maximum and 
+        the standard deviation of the residual are within their separate limits in ppm. 
+        Additionally, the mean residuals from gas standards in the range of 0ppm through 750ppm
+        must fall within acceptable limits after taking into account the 95% confidence interval
+        of the mean with a limited sample size. Otherwise, it is determined that the ASVCO2 unit 
+        has failed the test. This is shown in the table below.
         '''
     else:
         sixth_page_text_above_sixth_page_table = '''An undefined pass/fail criterion has been chosen
@@ -2034,184 +1860,19 @@ def generate_bigger_validation_report_reordered_Feb_2022(output_folder,sn,date_r
     document.append(Paragraph('EPOFF Recalculated (recalc) Pass/Fail results:'))
     document.append(Spacer(6*inch,0.1*inch))
 
-    # calculate whether or not the results will pass or fail and store the result in df_mean_stdev_tcorr_2
-    # df_mean_stdev_tcorr_2 = calculate_pf_df(df_mean_stdev_tcorr,n_std_dev)
-    #df_mean_stdev_tcorr_2 = calculate_pf_df(tuple_of_df_4_tables[2],n_std_dev)
-    # df_mean_stdev_tcorr_2 = calculate_pf_df(tuple_of_df_4_tables[2],n_std_dev,\
-    #     'Tcorr',comparison_type)
-
-    # convert dataframe to 2-D array, data2, with pass/fail criteria
-    # num_rows=len(df_mean_stdev_tcorr_2)
-    # num_cols=len(df_mean_stdev_tcorr_2.columns)
-    # data_pf_EPOFF_recalc=[]
-    # if ( comparison_type == 'combined' ):
-    #     header = [s.replace("_"," ") for s in df_mean_stdev_tcorr_2.columns.values]
-    # elif ( comparison_type == 'separate' ):
-    #     header=['gas_standard','dry_res_mean','mean_upper_limit','mean_pass_or_fail',\
-    #         'dry_res_stdev','stdev_upper_limit','stdev_pass_or_fail']
-    #     header = [s.replace("_"," ") for s in header]
-    #     header[2] = Paragraph('mean<br/>upper limit')
-    #     header[3] = Paragraph('mean<br/>pass or fail')
-    #     header[5] = Paragraph('stdev<br/>upper limit')
-    #     header[6] = Paragraph('stdev<br/>pass or fail')
-    # data_pf_EPOFF_recalc.append(header)
-    # #print(df_mean_stdev_tcorr_2.columns)
-    # for idx, row in df_mean_stdev_tcorr_2.iterrows():
-    #     if (comparison_type == 'combined'):
-    #         row_as_list = [row["gas_standard"],
-    #                         f'{row["mean"]:.4f}',
-    #                         f'{row["stdev"]:.4f}',
-    #                         row["pass_or_fail"],
-    #                         f'{row["upper_limit"]:.4f}',
-    #                         f'{row["margin"]:.4f}']
-    #     elif ( comparison_type == 'separate' ):
-    #         row_as_list = [row["gas_standard"],
-    #                         f'{row["mean"]:.4f}',
-    #                         f'{row["mean_upper_limit"]:.4f}',
-    #                         row["mean_pass_or_fail"],
-    #                         f'{row["stdev"]:.4f}',
-    #                         f'{row["stdev_upper_limit"]:.4f}',
-    #                         row["stdev_pass_or_fail"]]
-    #     else:
-    #         raise Exception(f'''undefined parameter {comparison_type} 
-    #         in generate_bigger_validation_report()''')
-    #     data_pf_EPOFF_recalc.append(row_as_list)
-    
-    # t5=Table(data_pf_EPOFF_recalc)
-    # # t2.setStyle(TableStyle([('ALIGN',(0,0),(num_cols,num_rows),'LEFT'),\
-    # #     ('TEXTCOLOR',(0,0),(num_cols,num_rows), colors.black),\
-    # #     ('TEXTCOLOR',(3,1),(3,num_rows), colors.green),\
-    # #     ('INNERGRID', (0,0), (num_cols,num_rows), 0.25, colors.black),\
-    # #     ('BOX', (0,0), (num_cols,num_rows), 0.25, colors.black)]))
-    # t5_table_style=[('ALIGN',(0,0),(num_cols,num_rows),'LEFT'),\
-    #     ('TEXTCOLOR',(0,0),(num_cols,num_rows), colors.black),\
-    #     ('INNERGRID', (0,0), (num_cols,num_rows), 0.25, colors.black),\
-    #     ('BOX', (0,0), (num_cols,num_rows), 0.25, colors.black)]
-    
-    # if comparison_type == 'combined':
-    #     for idx, row in df_mean_stdev_tcorr_2.iterrows():
-    #         if row["pass_or_fail"] == "PASS":
-    #             t5_table_style.append(('TEXTCOLOR',(3,idx+1),(3,idx+1),\
-    #                 colors.green))
-    #         else:
-    #             t5_table_style.append(('TEXTCOLOR',(3,idx+1),(3,idx+1),\
-    #                 colors.red))
-    #             any_single_failure_flag=True
-    # elif comparison_type == 'separate':
-    #     for idx, row in df_mean_stdev_tcorr_2.iterrows():
-    #         if row["mean_pass_or_fail"] == "PASS":
-    #             t5_table_style.append(('TEXTCOLOR',(3,idx+1),(3,idx+1),\
-    #                 colors.green))
-    #         else:
-    #             t5_table_style.append(('TEXTCOLOR',(3,idx+1),(3,idx+1),\
-    #                 colors.red))
-    #             any_single_failure_flag=True
-    #     for idx, row in df_mean_stdev_tcorr_2.iterrows():
-    #         if row["stdev_pass_or_fail"] == "PASS":
-    #             t5_table_style.append(('TEXTCOLOR',(6,idx+1),(6,idx+1),\
-    #                 colors.green))
-    #         else:
-    #             t5_table_style.append(('TEXTCOLOR',(6,idx+1),(6,idx+1),\
-    #                 colors.red))
-    #             any_single_failure_flag=True
-
-    # t5.setStyle(t5_table_style)
+    # For EPOFF with temperature recalculation, calculate whether or not the 
+    # results will pass or fail and convert result to reportlab table.
     t5, any_single_failure_flag = df_to_reportlab_table_with_pf(tuple_of_df_4_tables[2],\
         any_single_failure_flag,'Tcorr')
     document.append(t5)
     document.append(PageBreak())
 
-    #### Begin EPOFF Stuff ####
-    # document.append(Paragraph('EPOFF Pass/Fail Determination for ASVCO2 Gen2, Serial Number: ' + sn,\
-    #     ParagraphStyle(name='Title',fontSize=14)))
-    # document.append(Spacer(6*inch,0.1*inch))
-
     document.append(Spacer(6*inch,0.1*inch))
     document.append(Paragraph('EPOFF Pass/Fail results without recalculation (recalc):'))
     document.append(Spacer(6*inch,0.1*inch))
 
-    # calculate whether or not the results will pass or fail and store the result in df_mean_stdev_tcorr_2
-    #df_mean_stdev_not_tcorr_2 = calculate_pf_df(df_mean_stdev_not_tcorr,n_std_dev,'not_Tcorr')
-    #df_mean_stdev_not_tcorr_2 = calculate_pf_df(tuple_of_df_4_tables[3],n_std_dev,'not_Tcorr')
-    # df_mean_stdev_not_tcorr_2 = calculate_pf_df(tuple_of_df_4_tables[3],n_std_dev,\
-    #     'not_Tcorr',comparison_type)
-
-    # # convert dataframe to 2-D array, data2, with pass/fail criteria
-    # num_rows=len(df_mean_stdev_not_tcorr_2)
-    # num_cols=len(df_mean_stdev_not_tcorr_2.columns)
-    # data_pf_EPOFF_no_recalc=[]
-    # if ( comparison_type == 'combined' ):
-    #     header = [s.replace("_"," ") for s in df_mean_stdev_tcorr_2.columns.values]
-    # elif ( comparison_type == 'separate' ):
-    #     header=['gas_standard','dry_res_mean','mean_upper_limit','mean_pass_or_fail',\
-    #         'dry_res_stdev','stdev_upper_limit','stdev_pass_or_fail']
-    #     header = [s.replace("_"," ") for s in header]
-    #     header[2] = Paragraph('mean<br/>upper limit')
-    #     header[3] = Paragraph('mean<br/>pass or fail')
-    #     header[5] = Paragraph('stdev<br/>upper limit')
-    #     header[6] = Paragraph('stdev<br/>pass or fail')
-    # data_pf_EPOFF_no_recalc.append(header)
-    
-    # #print(df_mean_stdev_not_tcorr_2.columns)
-
-    # for idx, row in df_mean_stdev_not_tcorr_2.iterrows():
-    #     if (comparison_type == 'combined'):
-    #         row_as_list = [row["gas_standard"],
-    #                         f'{row["mean"]:.4f}',
-    #                         f'{row["stdev"]:.4f}',
-    #                         row["pass_or_fail"],
-    #                         f'{row["upper_limit"]:.4f}',
-    #                         f'{row["margin"]:.4f}']
-    #     elif ( comparison_type == 'separate' ):
-    #         row_as_list = [row["gas_standard"],
-    #                         f'{row["mean"]:.4f}',
-    #                         f'{row["mean_upper_limit"]:.4f}',
-    #                         row["mean_pass_or_fail"],
-    #                         f'{row["stdev"]:.4f}',
-    #                         f'{row["stdev_upper_limit"]:.4f}',
-    #                         row["stdev_pass_or_fail"]]
-    #     else:
-    #         raise Exception(f'''undefined parameter {comparison_type} 
-    #         in generate_bigger_validation_report()''')
-    #     data_pf_EPOFF_no_recalc.append(row_as_list)
-    
-    # t6=Table(data_pf_EPOFF_no_recalc)
-
-    # t6_table_style=[('ALIGN',(0,0),(num_cols,num_rows),'LEFT'),\
-    #     ('TEXTCOLOR',(0,0),(num_cols,num_rows), colors.black),\
-    #     ('INNERGRID', (0,0), (num_cols,num_rows), 0.25, colors.black),\
-    #     ('BOX', (0,0), (num_cols,num_rows), 0.25, colors.black)]
-    
-    # # change from df_mean_stdev_tcorr_2 to df_mean_stdev_not_tcorr_2, 8/06/2021, Pascal
-    # if comparison_type == 'combined':
-    #     for idx, row in df_mean_stdev_not_tcorr_2.iterrows():
-    #         if row["pass_or_fail"] == "PASS":
-    #             t6_table_style.append(('TEXTCOLOR',(3,idx+1),(3,idx+1),\
-    #                 colors.green))
-    #         else:
-    #             t6_table_style.append(('TEXTCOLOR',(3,idx+1),(3,idx+1),\
-    #                 colors.red))
-    #             any_single_failure_flag=True
-    # elif comparison_type == 'separate':
-    #     for idx, row in df_mean_stdev_not_tcorr_2.iterrows():
-    #         if row["mean_pass_or_fail"] == "PASS":
-    #             t6_table_style.append(('TEXTCOLOR',(3,idx+1),(3,idx+1),\
-    #                 colors.green))
-    #         else:
-    #             t6_table_style.append(('TEXTCOLOR',(3,idx+1),(3,idx+1),\
-    #                 colors.red))
-    #             any_single_failure_flag=True
-    #     for idx, row in df_mean_stdev_not_tcorr_2.iterrows():
-    #         if row["stdev_pass_or_fail"] == "PASS":
-    #             t6_table_style.append(('TEXTCOLOR',(6,idx+1),(6,idx+1),\
-    #                 colors.green))
-    #         else:
-    #             t6_table_style.append(('TEXTCOLOR',(6,idx+1),(6,idx+1),\
-    #                 colors.red))
-    #             any_single_failure_flag=True
-
-    # t6.setStyle(t6_table_style)
-
+    # For EPOFF with temperature recalculation, calculate whether or not the 
+    # results will pass or fail and convert result to reportlab table. 
     t6, any_single_failure_flag = df_to_reportlab_table_with_pf(tuple_of_df_4_tables[3],\
         any_single_failure_flag,'not_Tcorr')
     document.append(t6)
@@ -2411,16 +2072,7 @@ def generate_bigger_validation_report_reordered_Feb_2022(output_folder,sn,date_r
     document.append(PageBreak())
 
 
-    # document.append(Paragraph('Here\'s another table below:'))
-    # mydata=[['stuff',0.0],['more stuff',-2.6],\
-    #     ['even more stuff',-10.9],['yet again more stuff',9999999.099999]]
-    # t2=Table(mydata)
-    # t2.setStyle(TableStyle([('ALIGN',(0,0),(2,3),'LEFT'), ('TEXTCOLOR',(0,0),(2,3), colors.black),\
-    #     ('INNERGRID', (0,0), (2,3), 0.25, colors.black),('BOX', (0,0), (2,3), 0.25, colors.black)]))
-    # document.append(t2)
-
-
-    ##### 7th page #####
+    ##### Zth page #####
     document.append(Paragraph('Configuration Description for ASVCO2 Gen2, Serial Number: ' + sn,\
         ParagraphStyle(name='Title',fontSize=14)))
     document.append(Spacer(6*inch,0.1*inch))
@@ -2482,10 +2134,6 @@ def generate_bigger_validation_report_reordered_Feb_2022(output_folder,sn,date_r
         last_piece_of_filename = "PASS"
     output_filename = output_folder + '/' + "Gas_Validation_" + sn + "_" + \
         date_range[0][0:8] + "_" + last_piece_of_filename + ".pdf"
-    
-    # SimpleDocTemplate(output_filename,pagesize=letter,\
-    #     rightMargin=1*inch, leftMargin=1*inch,\
-    #         topMargin=1*inch, bottomMargin=1*inch).build(document)
 
     doc = SimpleDocTemplate(output_filename,pagesize=letter,\
         rightMargin=1*inch, leftMargin=1*inch,\

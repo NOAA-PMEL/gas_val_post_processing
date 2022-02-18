@@ -1041,7 +1041,7 @@ def plot_and_produce_report(sn,path_to_data,validation_text_filename):
     '1008':'cga-5176','1009':'cga-5178','3CA8A2533':'cga-5375','3CA8A2535':'cga-5353',\
     '3CA8A2538':'cga-5379','3CADC7571':'cga-5354','3CADC7573':'cga-5177',\
     '3CADC7565':'cga-5377','3CB942928':'cga-5378', '3CB94292E':'cga-5380',\
-    '3CD6D1DD5':'cga-5376','3CD94292C':'cga-5352'}
+    '3CD6D1DD5':'cga-5376','3CD94292C':'cga-5352','1011':'cga-5180','ASVTEST12':'cga-5081'}
     licorsernum = ASVCO2sn2LICORsn[sn]
 
     #choose 1st or 2nd cal for slope
