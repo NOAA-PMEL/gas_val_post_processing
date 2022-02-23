@@ -1,0 +1,71 @@
+{"3CA8A2535":
+    {"last_secondaryspan_calibration":"2021-07-06T00:00:00Z",
+    "secondaryspan_calibrated_spanserialnumber":"CC738196",
+    "ASVCO2_secondaryspan_serialnumber":"CB11490", 
+    "ASVCO2_span_serialnumber":"CC739825",
+    "ASVCO2_O2_serial":"GC22699015"
+    },
+"3CA8A2533":
+    {"last_secondaryspan_calibration":"2021-07-06T00:00:00Z",
+    "secondaryspan_calibrated_spanserialnumber":"CC738196",
+    "ASVCO2_secondaryspan_serialnumber":"CB11490", 
+    "ASVCO2_span_serialnumber":"CC739825",
+    "ASVCO2_O2_serial":"GC22699017"
+    },
+"3CA8A2538":
+    {"last_secondaryspan_calibration":"2021-07-06T00:00:00Z",
+    "secondaryspan_calibrated_spanserialnumber":"CC738196",
+    "ASVCO2_secondaryspan_serialnumber":"CB11490", 
+    "ASVCO2_span_serialnumber":"CC739825",
+    "ASVCO2_O2_serial":"GC22699024"
+    },
+"3CADC7571":
+    {"last_secondaryspan_calibration":"2021-07-24T00:00:00Z",
+    "secondaryspan_calibrated_spanserialnumber":"CC738196",
+    "ASVCO2_secondaryspan_serialnumber":"CB11490", 
+    "ASVCO2_span_serialnumber":"CC739825",
+    "ASVCO2_O2_serial":"GC22699026"
+    },
+"3CADC7573":
+    {"last_secondaryspan_calibration":"2021-06-10T00:00:00Z",
+    "secondaryspan_calibrated_spanserialnumber":"CC738196",
+    "ASVCO2_secondaryspan_serialnumber":"CB11490", 
+    "ASVCO2_span_serialnumber":"CC739825",
+    "ASVCO2_O2_serial":"GC22699018"
+    },
+"3CADC7565":
+    {"last_secondaryspan_calibration":"2021-07-24T00:00:00Z",
+    "secondaryspan_calibrated_spanserialnumber":"CC738196",
+    "ASVCO2_secondaryspan_serialnumber":"CB11490", 
+    "ASVCO2_span_serialnumber":"CC739825",
+    "ASVCO2_O2_serial":"GC22699016"
+    },
+"3CB94292C":
+    {"last_secondaryspan_calibration":"2021-07-06T00:00:00Z",
+    "secondaryspan_calibrated_spanserialnumber":"CC738196",
+    "ASVCO2_secondaryspan_serialnumber":"CB11490", 
+    "ASVCO2_span_serialnumber":"CC739825",
+    "ASVCO2_O2_serial":"GC22699189"
+    },
+"3CB94292E":
+    {"last_secondaryspan_calibration":"2021-07-24T00:00:00Z",
+    "secondaryspan_calibrated_spanserialnumber":"CC738196",
+    "ASVCO2_secondaryspan_serialnumber":"CB11490", 
+    "ASVCO2_span_serialnumber":"CC739825",
+    "ASVCO2_O2_serial":"GC22699027"
+    },
+"3CB942928":
+    {"last_secondaryspan_calibration":"2021-07-24T00:00:00Z",
+    "secondaryspan_calibrated_spanserialnumber":"CC738196",
+    "ASVCO2_secondaryspan_serialnumber":"CB11490", 
+    "ASVCO2_span_serialnumber":"CC739825",
+    "ASVCO2_O2_serial":"GC22699025"
+    },
+"3CD6D1DD5":
+    {"last_secondaryspan_calibration":"2021-07-24T00:00:00Z",
+    "secondaryspan_calibrated_spanserialnumber":"CC738196",
+    "ASVCO2_secondaryspan_serialnumber":"CB11490", 
+    "ASVCO2_span_serialnumber":"CC739825",
+    "ASVCO2_O2_serial":""
+    }
+}

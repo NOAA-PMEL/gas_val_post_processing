@@ -1,0 +1,9 @@
+[{"min":0.0,"max":2.0,"tag":"0ppm"},
+{"min":60.0,"max":140.0,"tag":"100ppm Nominal"},
+{"min":310.0,"max":390.0,"tag":"350ppm Nominal"},
+{"min":460.0,"max":540.0,"tag":"500ppm Nominal"},
+{"min":710.0,"max":790.0,"tag":"750ppm Nominal"},
+{"min":900.0,"max":1100.0,"tag":"1000ppm Nominal"},
+{"min":1400.0,"max":1600.0,"tag":"1500ppm Nominal"},
+{"min":1900.0,"max":2100.0,"tag":"2000ppm Nominal"},
+{"min":2400.0,"max":2600.0,"tag":"2500ppm Nominal"}]
