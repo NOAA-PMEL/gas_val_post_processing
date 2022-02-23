@@ -2350,7 +2350,7 @@ def load_Val_file(val_filename,big_dry_df=pd.DataFrame(),\
     # bigDictionary, config_stuff = load_Val_File_into_dicts(val_filename)
     #### or
     # bigDictionary, config_stuff, mode_and_gas_stuff, flush_stuff = \
-    #     load_Val_File_into_dicts_v3(validation_text_filename,timestamp_mode='Unix epoch, days')
+    #     load_Val_File_into_dicts_v3(val_filename,timestamp_mode='Unix epoch, days')
 
     #### load_Val_File_into_dicts_v3() is useful for validation datasets 2022 and later ####
     bigDictionary, config_stuff, mode_and_gas_stuff, flush_stuff = \
@@ -2565,7 +2565,7 @@ def get_glob_pattern(validation_text_filename):
         lower_day_for_glob_int = int(day_for_glob)
         upper_day_for_glob_int = lower_day_for_glob_int+7
         upper_month_for_glob_int = int(month_for_glob)
-        lower_month_for_glob_int = upper_year_for_glob_int
+        lower_month_for_glob_int = upper_month_for_glob_int
         upper_year_for_glob_int = int(year_for_glob)
         lower_year_for_glob_int = upper_year_for_glob_int
         if ( upper_day_for_glob_int > 30 ):
@@ -2592,9 +2592,9 @@ def get_glob_pattern(validation_text_filename):
                 glob_date_pattern += '[' + MM_end[idx] + '-' + MM_start[idx] + ']'
         for idx in range(0,2):
             if ( DD_start[idx] <= DD_end[idx] ):
-                glob_date_pattern += '[' + MM_start[idx] + '-' + MM_end[idx] + ']'
+                glob_date_pattern += '[' + DD_start[idx] + '-' + DD_end[idx] + ']'
             else:
-                glob_date_pattern += '[' + MM_end[idx] + '-' + MM_start[idx] + ']'
+                glob_date_pattern += '[' + DD_end[idx] + '-' + DD_start[idx] + ']'
     else:
         raise Exception("""Irregular filename pattern for {validation_text_filename}, 
         it needs to have 8 digit date with a dash followed by a 6 digit hour, minute and second""")
