@@ -257,7 +257,8 @@ def load_Val_File_into_dicts_v3(val_filename, timestamp_mode='ISO-8601 string'):
     flush_stuff = {}
     for idx in range(1,len(stuff)):
         time_str = re.search(r'time=(.*)',stuff[idx]).groups()[0]#.strip()
-        ref_gas = float(re.search(r'Validation with reference gas:(.*)',stuff[idx]).groups()[0])
+        ref_gas = float(re.search(r'Validation with reference gas:\s*(\d+\.\d+|\d+)',\
+            stuff[idx]).groups()[0])
         split_by_newline = re.split(r'\n',stuff[idx])
         first_header_entered=False
         nested_dict = {}
@@ -301,7 +302,8 @@ def load_Val_File_into_dicts_v3(val_filename, timestamp_mode='ISO-8601 string'):
                         entries_of_data[idx]=some_datetime_object.strftime(" %Y-%m-%dT%H:%M:%S")+'Z'
                     elif (field_name == 'datetime' and \
                         timestamp_mode == 'ISO-8601 string'):
-                        if ( re.search(time_re,parts[1].strip()) ):
+                        #if ( re.search(time_re,parts[1].strip()) ):
+                        if ( re.search(time_re,entries_of_data[idx]) ):
                             entries_of_data[idx] = " " + entries_of_data[idx]  # prepend leading space???
                         else:
                             raise Exception (f"""Unrecognized timestamp format for {entries_of_data[idx]} 
@@ -434,7 +436,59 @@ def val_fix_nan_in_dict(bigDictionary):
                     bigDictionary[k1][k2][idx] = float(item)
     return bigDictionary
 
-def extra_range_checks(filename):
+#### Added by Pascal, 2/25/2022 ####
+def get_glob_pattern(validation_text_filename):
+    m = re.search(r'.*(\d{8})-(\d{6}).txt',validation_text_filename)
+    if ( m ):
+        recent_date_for_glob = m.groups()[0]
+        year_for_glob = recent_date_for_glob[0:4]  # something like 2021
+        month_for_glob = recent_date_for_glob[4:6]
+        day_for_glob = recent_date_for_glob[6:8]
+
+        #look one week-ish ahead for glob pattern, even at end of month and year...
+        lower_day_for_glob_int = int(day_for_glob)
+        upper_day_for_glob_int = lower_day_for_glob_int+7
+        upper_month_for_glob_int = int(month_for_glob)
+        lower_month_for_glob_int = upper_month_for_glob_int
+        upper_year_for_glob_int = int(year_for_glob)
+        lower_year_for_glob_int = upper_year_for_glob_int
+        if ( upper_day_for_glob_int > 30 ):
+            upper_day_for_glob_int = 30 - upper_day_for_glob_int
+            upper_month_for_glob_int +=1 
+            if ( upper_month_for_glob_int > 12):
+                upper_month_for_glob_int = 1  #reset to january
+                upper_year_for_glob_int += 1
+        YYYY_start = str(lower_year_for_glob_int); YYYY_end = str(upper_year_for_glob_int)
+        MM_start = str('{:02d}'.format(lower_month_for_glob_int))  # keep leading zero, 2 digits
+        MM_end = str('{:02d}'.format(upper_month_for_glob_int))  # keep leading zero, 2 digits
+        DD_start = str('{:02d}'.format(lower_day_for_glob_int))  # keep leading zero, 2 digits
+        DD_end = str('{:02d}'.format(upper_day_for_glob_int))  # keep leading zero, 2 digits
+        glob_date_pattern = ''
+        for idx in range(0,4):
+            if ( YYYY_start[idx] <= YYYY_end[idx] ):
+                glob_date_pattern += '[' + YYYY_start[idx] + '-' + YYYY_end[idx] + ']'
+            else:
+                glob_date_pattern += '[' + YYYY_end[idx] + '-' + YYYY_start[idx] + ']'
+        for idx in range(0,2):
+            if ( MM_start[idx] <= MM_end[idx] ):
+                glob_date_pattern += '[' + MM_start[idx] + '-' + MM_end[idx] + ']'
+            else:
+                glob_date_pattern += '[' + MM_end[idx] + '-' + MM_start[idx] + ']'
+        for idx in range(0,2):
+            if ( DD_start[idx] <= DD_end[idx] ):
+                glob_date_pattern += '[' + DD_start[idx] + '-' + DD_end[idx] + ']'
+            else:
+                glob_date_pattern += '[' + DD_end[idx] + '-' + DD_start[idx] + ']'
+    else:
+        raise Exception("""Irregular filename pattern for {validation_text_filename}, 
+        it needs to have 8 digit date with a dash followed by a 6 digit hour, minute and second""")
+
+
+    glob_pattern =  glob_date_pattern + '*.txt'
+
+    return glob_pattern
+
+def extra_range_checks(filename,validation_text_filename):
     df_flags = loadASVall_flags(filename)
     df_stats = loadASVall_stats(filename)
     data_all_modes = []
@@ -900,8 +954,17 @@ def postprocesslicorspan2_w_mode(filename_coeff, filename_data, span2_in, S1_lab
 # temperature_slope_files=['slope_cal_1_csv_all_6_10.csv','slope_cal_2_csv_all_6_10.csv']
 
 def get_summary_stats_df_by_group(df_830_830eq_EPOFF,df_830_830eq_APOFF):
+    
     ## working here now
-    gas_standard_groups = [(0,750),(0,2),(2,300),(300,775),(775,1075),(1075,2575)]
+    #gas_standard_groups = [(0,750),(0,2),(2,300),(300,775),(775,1075),(1075,2575)]
+
+    # read in json file from config folder to get the gas standard tag ranges for the summary
+    PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    json_file = open(PROJECT_ROOT + '/code/post_processing/config/summary_gas_standard_tag_ranges.json','r',encoding='utf-8')
+    summary_gas_standard_tag_ranges = json.load(json_file)
+    json_file.close()
+    num_ranges = len(summary_gas_standard_tag_ranges)
+
     list_of_df_APOFF = []
     list_of_df_EPOFF = []
     d_for_df_APOFF_t_corr_summary_stats = {"gas_standard_lower":[],"gas_standard_upper":[],\
@@ -912,10 +975,12 @@ def get_summary_stats_df_by_group(df_830_830eq_EPOFF,df_830_830eq_APOFF):
         "mean":[],"stdev":[],"max":[]}
     d_for_df_EPOFF_not_t_corr_summary_stats = {"gas_standard_lower":[],"gas_standard_upper":[],\
         "mean":[],"stdev":[],"max":[]}
-    for idx, this_group in enumerate(gas_standard_groups):
+    
+    #for idx, this_group in enumerate(gas_standard_groups):
+    for idx, this_group in enumerate(summary_gas_standard_tag_ranges):
         
         #assemble upper and lower limits from each group
-        lower_ppm_limit = this_group[0]; upper_ppm_limit = this_group[1]
+        lower_ppm_limit = this_group['lower']; upper_ppm_limit = this_group['upper']
         d_for_df_EPOFF_not_t_corr_summary_stats["gas_standard_lower"].append(lower_ppm_limit)
         d_for_df_APOFF_not_t_corr_summary_stats["gas_standard_lower"].append(lower_ppm_limit)
         d_for_df_EPOFF_t_corr_summary_stats["gas_standard_lower"].append(lower_ppm_limit)
@@ -1095,7 +1160,9 @@ def plot_and_produce_report(sn,path_to_data,validation_text_filename):
     #filenames=glob.glob('./ASV1002_March2021_ALL_Files/2021*.txt')
     #filenames=glob.glob('./1006/20210429/2021*.txt')#***************
     #filenames=glob.glob('./data/1006/20210430/ALL/2021*.txt')#***************
-    filenames=glob.glob(path_to_ALL + '/2021*.txt')
+    #filenames=glob.glob(path_to_ALL + '/2021*.txt')
+    glob_pattern = get_glob_pattern(validation_text_filename)
+    filenames=glob.glob(path_to_ALL + dir_sep + glob_pattern)
     filenames.sort()
     #print(filenames)
 
@@ -1480,7 +1547,9 @@ def plot_and_produce_report_w_extra_checks(sn,path_to_data,validation_text_filen
     #%%
     #load data here *******************************************
     #filenames=glob.glob(path_to_ALL + '/2021*.txt')
-    filenames=glob.glob(path_to_ALL + '/20*.txt')
+    #filenames=glob.glob(path_to_ALL + '/20*.txt')
+    glob_pattern = get_glob_pattern(validation_text_filename)
+    filenames=glob.glob(path_to_ALL + dir_sep + glob_pattern)
     filenames.sort()
     #print(filenames)
 
@@ -1494,28 +1563,33 @@ def plot_and_produce_report_w_extra_checks(sn,path_to_data,validation_text_filen
     df = pd.DataFrame()
 
     fault_text = ''  # new feature added 9/21/2021
+    complete_filenames = []  # list of filenames that are actually complete
     for i in range(len(filenames)):
         if i > 0:
             filename_data = filenames[i]
             filename_coeff = filenames[i] #when data and coeff wasn't lined up, used filenames[i-1]
             
             # Pascal, bypass files without coefficients
-            COEFF_found_in_file=False
+            COEFF_DRY_FLAGS_found_in_file=False
             with open(filename_coeff) as f:
-                if 'COEFF' in f.read():
-                    COEFF_found_in_file =True
+                if (('COEFF' in f.read()) and \
+                    ('DRY' in f.read()) and \
+                    ('FLAGS' in f.read())):
+                    COEFF_DRY_FLAGS_found_in_file =True
             f.close()
             del f
 
             # Pascal, only process the file if COEFF was found in the file
-            if COEFF_found_in_file:
+            if COEFF_DRY_FLAGS_found_in_file:
+                complete_filenames.append(filenames[i])  # it's complete, add it to the list
                 res_from_each_file_APOFF = postprocesslicorspan2_w_mode(filename_coeff, filename_data, \
                     span2_temp, S1_lab, slope_licor, "APOFF")
                 res_from_each_file_EPOFF = postprocesslicorspan2_w_mode(filename_coeff, filename_data, \
                     span2_temp, S1_lab, slope_licor, "EPOFF")
                 #print (i, res_from_each_file)
                 #print(f'filename = {filenames[i]}')
-                fault_text += extra_range_checks(filenames[i])  # new feature added 9/21/2021
+                fault_text += extra_range_checks(filenames[i],\
+                    validation_text_filename)  # new feature added 9/21/2021
                 #print(f'fault_text = {fault_text}')
                 data_APOFF.append(res_from_each_file_APOFF)
                 data_EPOFF.append(res_from_each_file_EPOFF)
@@ -1545,7 +1619,14 @@ def plot_and_produce_report_w_extra_checks(sn,path_to_data,validation_text_filen
     residuals_830_830eq_EPOFF = residuals_830_830eq_EPOFF.rename(columns={0: 'CO2', 1: 'CO2_recalc', 2: 'Res (meas-recalc)'})
 
     #line up average residuals with filenames
-    filenames_ser=pd.Series([elem[0:] for elem in filenames] )
+    # filenames_ser=pd.Series([elem[0:] for elem in filenames] )
+
+    # df_830_830eq_APOFF = pd.concat([filenames_ser,residuals_830_830eq_APOFF], axis=1)
+    # df_830_830eq_EPOFF = pd.concat([filenames_ser,residuals_830_830eq_EPOFF], axis=1)
+
+    filenames_ser=pd.Series([elem[0:] for elem in complete_filenames])
+    #print(f'len(filenames_ser)={len(filenames_ser)}')
+    #print(f'len(residuals_830_830eq_APOFF)={len(residuals_830_830eq_APOFF)}')
 
     df_830_830eq_APOFF = pd.concat([filenames_ser,residuals_830_830eq_APOFF], axis=1)
     df_830_830eq_EPOFF = pd.concat([filenames_ser,residuals_830_830eq_EPOFF], axis=1)

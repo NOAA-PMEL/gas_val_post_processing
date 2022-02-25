@@ -1688,10 +1688,37 @@ def df_to_reportlab_table_with_pf(df_in, any_single_failure_flag, calc_type='Tco
 
     return t3, any_single_failure_flag
 
+def get_report_text_from_val_file(validation_text_filename):
+    
+    file_ptr=open(validation_text_filename, 'r')
+    lines = file_ptr.readlines()
+    output_text = ''
+
+    start_line = 0
+    line_is_empty=len(lines[start_line].strip()) == 0
+    while line_is_empty:
+        start_line += 1
+        line_is_empty = len(lines[start_line].strip()) == 0
+        
+    end_line = start_line
+    line_is_not_empty=len(lines[end_line].strip()) != 0
+    while line_is_not_empty:
+        end_line += 1
+        line_is_not_empty = len(lines[end_line].strip()) != 0          
+
+    for idx in range(start_line,end_line):
+        output_text += lines[idx] + "<br/>"
+    
+    file_ptr.close()
+
+    return output_text
+
+
 def generate_bigger_validation_report_reordered_Feb_2022(output_folder,sn,date_range,\
     figure_filenames_and_sizes,tuple_of_df_4_tables,validation_text_filename,final_text=''):
     document = []
     
+
     PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     ##### 1st page (and second page) #####
     document.append(Image(PROJECT_ROOT + '/code/post_processing/config/ASVCO2_logo.png',3.87*inch,1.06*inch))
@@ -1700,10 +1727,43 @@ def generate_bigger_validation_report_reordered_Feb_2022(output_folder,sn,date_r
         ParagraphStyle(name='Title',fontSize=14)))
     document.append(Spacer(6*inch,0.1*inch))
 
-    ##### 1st page content, previously 5th page content #####
-    document.append(Paragraph('APOFF Pass/Fail Determination for ASVCO2 Gen2, Serial Number: ' + sn,\
+    #get last_asvco2_validation date, as output by microcontroller
+    formatted_report_text = get_report_text_from_val_file(validation_text_filename)
+    # could also use \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z
+    print('####### formatted report text #######')
+    print(formatted_report_text)
+    m = re.search(r'last_ASVCO2_validation= (.*)\n',formatted_report_text)
+    if (m):
+        last_ASVCO2_validation_txt = m.groups()[0]
+    else:
+        last_ASVCO2_validation_txt = 'Not Found'
+    document.append(Paragraph('last_ASVCO2_validation reported: ' +\
+        last_ASVCO2_validation_txt,ParagraphStyle(name='Title',fontSize=14)))
+    document.append(Spacer(6*inch,0.1*inch))
+
+    ##### 1st page content, previously 5th page content #####    
+    document.append(Paragraph('Results for ASVCO2 Gen2, Serial Number: ' + sn,\
         ParagraphStyle(name='Title',fontSize=14)))
     document.append(Spacer(6*inch,0.1*inch))
+
+    ##### format start date and end date extracted from the stuff #####
+    start_year = date_range[0][0:4]; end_year = date_range[1][0:4]
+    start_month = date_range[0][4:6]; end_month = date_range[1][4:6]
+    start_day = date_range[0][6:8]; end_day = date_range[1][6:8]
+    start_str = start_month + "/" + start_day + "/" + start_year
+    end_str = end_month + "/" + end_day + "/" + end_year
+
+    first_page_text_above_tables='''
+    The data shown in this report was collected between ''' + start_str + " and " + end_str + '''
+    using ASVCO2 Gen2 with S/N ''' + sn + '''.<br/>
+    The residuals shown below represent the measured carbon dioxide (CO2)
+    gas concentration from the ASVCO2 test article in parts per million (ppm) subtracted from the
+    standard gas concentration of CO2 in ppm. The measured carbon dioxide concentration has been 
+    adjusted for relative humidity using techniques described in ref. [1]. These CO2 concentrations
+    are referred to as dry values. For more info on other specific terms, see the 'Description of 
+    Terms and Abbreviations' section at the end of this report.'''
+
+    document.append(Paragraph(first_page_text_above_tables))
 
     #comparison_type = 'combined'  # pass/fail will be by abs(mean) + n_std_dev * std_dev
     comparison_type = 'separate'  # pass/fail will be by separate limits of mean and std_dev
@@ -1746,60 +1806,6 @@ def generate_bigger_validation_report_reordered_Feb_2022(output_folder,sn,date_r
     document.append(t_0_750_APOFF)
     document.append(Spacer(6*inch,0.1*inch))
 
-    n_std_dev=1  # for combined only number of standard deviations from the mean to set pass fail criteria
-    
-    if ( comparison_type == 'combined'):
-        fifth_page_text_above_fifth_page_table='''
-        The ASVCO2 unit is credited with a passing result if the sum of the standard deviation,
-        multiplied by a factor of ''' + f'{n_std_dev:.1f}' + ''', and the absolute value of the 
-        mean is less than or equal to the upper limit in ppm. Otherwise, it is determined that 
-        the ASVCO2 unit has failed the test. This is shown in the table below.
-        '''
-    elif ( comparison_type == 'separate'):
-        fifth_page_text_above_fifth_page_table='''
-        The ASVCO2 unit is credited with a passing result if the mean, maximum and 
-        the standard deviation of the residual are within their separate limits in ppm. 
-        Additionally, the mean residuals from gas standards in the range of 0ppm through 750ppm
-        must fall within acceptable limits after taking into account the 95% confidence interval
-        of the mean with a limited sample size. Otherwise, it is determined that the ASVCO2 unit 
-        has failed the test. This is shown in the table below.
-        '''
-    else:
-        fifth_page_text_above_fifth_page_table = '''An undefined pass/fail criterion has been chosen
-        and these pass/fail results might be invalid.'''
-
-    document.append(Paragraph(fifth_page_text_above_fifth_page_table))
-    document.append(Spacer(6*inch,0.1*inch))
-    
-    document.append(Paragraph('APOFF Recalculated (recalc) Pass/Fail results:'))
-    document.append(Spacer(6*inch,0.1*inch))
-
-    # For APOFF with temperature recalculation, calculate whether or not the 
-    # results will pass or fail and convert result to reportlab table.
-    t3, any_single_failure_flag = df_to_reportlab_table_with_pf(tuple_of_df_4_tables[0],\
-        any_single_failure_flag,'Tcorr')
-    document.append(t3)
-    document.append(PageBreak())
-
-    document.append(Spacer(6*inch,0.1*inch))
-    document.append(Paragraph('APOFF Pass/Fail results without recalculation (recalc):'))
-    document.append(Spacer(6*inch,0.1*inch))
-
-    # For APOFF without temperature recalculation (dry values), calculate whether or not the 
-    # results will pass or fail and convert result to reportlab table.
-    t4, any_single_failure_flag = df_to_reportlab_table_with_pf(tuple_of_df_4_tables[1],\
-        any_single_failure_flag,'not_Tcorr')
-    document.append(t4)
-
-    document.append(PageBreak())
-    ##### End of Xst page content, previously 5th page content #####
-
-    ##### Xnd Page, previously 6th page content #####
-    ##### Begin EPOFF stuff #####
-    document.append(Paragraph('EPOFF Pass/Fail Determination for ASVCO2 Gen2, Serial Number: ' + sn,\
-        ParagraphStyle(name='Title',fontSize=14)))
-    document.append(Spacer(6*inch,0.1*inch))
-
     #### Feb 2022, new stuff, vaguely IAW Adrienne Sutton's direction ####
     data_0_750_EPOFF = []
     df_mean_w_95_conf_interval_EPOFF = tuple_of_df_4_tables[5]
@@ -1833,6 +1839,84 @@ def generate_bigger_validation_report_reordered_Feb_2022(output_folder,sn,date_r
     document.append(Spacer(6*inch,0.1*inch))
     t_0_750_EPOFF.setStyle(t_0_750_EPOFF_table_style)
     document.append(t_0_750_EPOFF)
+    document.append(Spacer(6*inch,0.1*inch))
+
+    n_std_dev=1  # for combined only number of standard deviations from the mean to set pass fail criteria
+    
+    document.append(Paragraph('Range check results summary:'))
+    document.append(Spacer(6*inch,0.1*inch))
+    #### New stuff for range check####
+    if ( re.search(r'.*The following problems were found in.*',final_text) ):
+        document.append(Paragraph("<font color=\"orange\">Range Check: Some values were found to be out of range"\
+            " please see the end of this report for details.</font>",\
+                ParagraphStyle(name='Header12pt',fontSize=12)))
+    else:
+        document.append(Paragraph("Range Check: All values were found to be out in range",
+                ParagraphStyle(name='Header12pt',fontSize=12)))
+
+    ref1_text="""[1] Sutton, A. J., et al. (2014) A high-frequency atmospheric and seawater pCO2 data set from 
+    14 open-ocean sites using a moored autonomous system, Earth Syst. Sci. Data 6(2): 353-366, 
+    doi:10.5194/essd-6-353-2014."""
+
+    document.append(Paragraph('References:'))
+    document.append(Paragraph(ref1_text))
+    document.append(PageBreak())
+
+    #### 2nd page, previously 5th page ####
+    document.append(Paragraph('APOFF Pass/Fail Determination for ASVCO2 Gen2, Serial Number: ' + sn,\
+        ParagraphStyle(name='Title',fontSize=14)))
+    document.append(Spacer(6*inch,0.1*inch))
+    if ( comparison_type == 'combined'):
+        fifth_page_text_above_fifth_page_table='''
+        The ASVCO2 unit is credited with a passing result if the sum of the standard deviation,
+        multiplied by a factor of ''' + f'{n_std_dev:.1f}' + ''', and the absolute value of the 
+        mean is less than or equal to the upper limit in ppm. Otherwise, it is determined that 
+        the ASVCO2 unit has failed the test. This is shown in the table below.
+        '''
+    elif ( comparison_type == 'separate'):
+        fifth_page_text_above_fifth_page_table='''
+        The ASVCO2 unit is credited with a passing result if the mean, maximum and 
+        the standard deviation of the residual are within their separate limits in ppm. 
+        Additionally, the mean residuals from gas standards in the range of 0ppm through 750ppm
+        must fall within acceptable limits after taking into account the 95% confidence interval
+        of the mean with a limited sample size. Otherwise, it is determined that the ASVCO2 unit 
+        has failed the test. This is shown in the table below.
+        '''
+    else:
+        fifth_page_text_above_fifth_page_table = '''An undefined pass/fail criterion has been chosen
+        and these pass/fail results might be invalid.'''
+
+    document.append(Paragraph(fifth_page_text_above_fifth_page_table))
+    document.append(Spacer(6*inch,0.1*inch))
+    
+    document.append(Paragraph('APOFF Recalculated (recalc) Pass/Fail results:'))
+    document.append(Spacer(6*inch,0.1*inch))
+
+    # For APOFF with temperature recalculation, calculate whether or not the 
+    # results will pass or fail and convert result to reportlab table.
+    t3, any_single_failure_flag = df_to_reportlab_table_with_pf(tuple_of_df_4_tables[0],\
+        any_single_failure_flag,'Tcorr')
+    document.append(t3)
+    document.append(PageBreak())
+
+    #### 3rd page ####
+    document.append(Spacer(6*inch,0.1*inch))
+    document.append(Paragraph('APOFF Pass/Fail results without recalculation (recalc):'))
+    document.append(Spacer(6*inch,0.1*inch))
+
+    # For APOFF without temperature recalculation (dry values), calculate whether or not the 
+    # results will pass or fail and convert result to reportlab table.
+    t4, any_single_failure_flag = df_to_reportlab_table_with_pf(tuple_of_df_4_tables[1],\
+        any_single_failure_flag,'not_Tcorr')
+    document.append(t4)
+
+    document.append(PageBreak())
+    ##### End of Xst page content, previously 5th page content #####
+
+    ##### Xnd Page, previously 6th page content #####
+    ##### Begin EPOFF stuff #####
+    document.append(Paragraph('EPOFF Pass/Fail Determination for ASVCO2 Gen2, Serial Number: ' + sn,\
+        ParagraphStyle(name='Title',fontSize=14)))
     document.append(Spacer(6*inch,0.1*inch))
 
     if ( comparison_type == 'combined'):
@@ -1877,15 +1961,6 @@ def generate_bigger_validation_report_reordered_Feb_2022(output_folder,sn,date_r
         any_single_failure_flag,'not_Tcorr')
     document.append(t6)
     document.append(Spacer(6*inch,0.1*inch))
-
-    #### New stuff for range check####
-    if ( re.search(r'.*The following problems were found in.*',final_text) ):
-        document.append(Paragraph("<font color=\"orange\">Range Check: Some values were found to be out of range"\
-            " please see the end of this report for details.</font>",\
-                ParagraphStyle(name='Header12pt',fontSize=12)))
-    else:
-        document.append(Paragraph("Range Check: All values were found to be out in range",
-                ParagraphStyle(name='Header12pt',fontSize=12)))
 
     document.append(PageBreak())
     #### End of 2nd page content, previously 6th page content ####

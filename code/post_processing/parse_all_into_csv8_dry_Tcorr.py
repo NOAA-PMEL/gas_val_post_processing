@@ -1202,7 +1202,8 @@ def load_Val_File_into_dicts_v3(val_filename, timestamp_mode='ISO-8601 string'):
     flush_stuff = {}
     for idx in range(1,len(stuff)):
         time_str = re.search(r'time=(.*)',stuff[idx]).groups()[0]#.strip()
-        ref_gas = float(re.search(r'Validation with reference gas:(.*)',stuff[idx]).groups()[0])
+        ref_gas = float(re.search(r'Validation with reference gas:\s*(\d+\.\d+|\d+)',\
+            stuff[idx]).groups()[0])
         split_by_newline = re.split(r'\n',stuff[idx])
         first_header_entered=False
         nested_dict = {}
@@ -1246,7 +1247,8 @@ def load_Val_File_into_dicts_v3(val_filename, timestamp_mode='ISO-8601 string'):
                         entries_of_data[idx]=some_datetime_object.strftime(" %Y-%m-%dT%H:%M:%S")+'Z'
                     elif (field_name == 'datetime' and \
                         timestamp_mode == 'ISO-8601 string'):
-                        if ( re.search(time_re,parts[1].strip()) ):
+                        #if ( re.search(time_re,parts[1].strip()) ):
+                        if ( re.search(time_re,entries_of_data[idx]) ):
                             entries_of_data[idx] = " " + entries_of_data[idx]  # prepend leading space???
                         else:
                             raise Exception (f"""Unrecognized timestamp format for {entries_of_data[idx]} 
