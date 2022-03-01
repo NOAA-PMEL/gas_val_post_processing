@@ -1572,14 +1572,16 @@ def plot_and_produce_report_w_extra_checks(sn,path_to_data,validation_text_filen
             # Pascal, bypass files without coefficients
             COEFF_DRY_FLAGS_found_in_file=False
             with open(filename_coeff) as f:
-                if (('COEFF' in f.read()) and \
-                    ('DRY' in f.read()) and \
-                    ('FLAGS' in f.read())):
+                file_text = f.read()
+                if (('COEFF' in file_text) and \
+                    ('DRY' in file_text) and \
+                    ('FLAGS' in file_text)):
                     COEFF_DRY_FLAGS_found_in_file =True
             f.close()
-            del f
+            del f,file_text
 
             # Pascal, only process the file if COEFF was found in the file
+            print(f'COEFF_DRY_FLAGS_found_in_file = {COEFF_DRY_FLAGS_found_in_file}')
             if COEFF_DRY_FLAGS_found_in_file:
                 complete_filenames.append(filenames[i])  # it's complete, add it to the list
                 res_from_each_file_APOFF = postprocesslicorspan2_w_mode(filename_coeff, filename_data, \
@@ -1624,44 +1626,53 @@ def plot_and_produce_report_w_extra_checks(sn,path_to_data,validation_text_filen
     # df_830_830eq_APOFF = pd.concat([filenames_ser,residuals_830_830eq_APOFF], axis=1)
     # df_830_830eq_EPOFF = pd.concat([filenames_ser,residuals_830_830eq_EPOFF], axis=1)
 
-    filenames_ser=pd.Series([elem[0:] for elem in complete_filenames])
+    filenames_ser=pd.Series([elem[0:] for elem in complete_filenames],dtype='string')
     #print(f'len(filenames_ser)={len(filenames_ser)}')
     #print(f'len(residuals_830_830eq_APOFF)={len(residuals_830_830eq_APOFF)}')
+    min_len_APOFF = min(len(filenames_ser),len(residuals_830_830eq_APOFF))
+    min_len_EPOFF = min(len(filenames_ser),len(residuals_830_830eq_EPOFF))
+    filenames_ser_APOFF = filenames_ser.loc[0:min_len_APOFF].copy()
+    filenames_ser_EPOFF = filenames_ser.loc[0:min_len_EPOFF].copy()
+    residuals_830_830eq_APOFF = residuals_830_830eq_APOFF.loc[0:min_len_APOFF,:]
+    residuals_830_830eq_EPOFF = residuals_830_830eq_EPOFF.loc[0:min_len_APOFF,:]
+    print(f'len(filenames_ser_APOFF)={len(filenames_ser_APOFF)}')
+    print(f'len(residuals_830_830eq_APOFF)={len(residuals_830_830eq_APOFF)}')
 
-    df_830_830eq_APOFF = pd.concat([filenames_ser,residuals_830_830eq_APOFF], axis=1)
-    df_830_830eq_EPOFF = pd.concat([filenames_ser,residuals_830_830eq_EPOFF], axis=1)
+    df_830_830eq_APOFF = pd.concat([filenames_ser_APOFF,residuals_830_830eq_APOFF], axis=1)
+    df_830_830eq_EPOFF = pd.concat([filenames_ser_EPOFF,residuals_830_830eq_EPOFF], axis=1)
 
     ##### New feature to add +/- values from t-distribution #####
-    alpha = 0.05  # significance level = 5% 
-    # df = 5  # degrees of freedom
-    mask_low_ppm = (df_830_830eq_APOFF['gas_standard'] >= 0.0) & \
-        (df_830_830eq_APOFF['gas_standard'] <= 800.0)
-    dof_APOFF = len(df_830_830eq_APOFF.loc[mask_low_ppm])-1  # degrees of freedom                                     
-    v = t.ppf(1 - alpha/2, dof_APOFF) 
-    print(f'v: {v}, dof: {dof_APOFF}')
-    res_mean_APOFF = df_830_830eq_APOFF['std_830_res'].loc[mask_low_ppm].mean()
-    res_standard_error_APOFF = df_830_830eq_APOFF['std_830_res'].loc[mask_low_ppm].sem(ddof=1)
-    plus_or_minus = v*res_standard_error_APOFF
-    print(f'Mean APOFF residual between 0 and 750ppm: {res_mean_APOFF} +/- {plus_or_minus}ppm, 95% confidence')
-    APOFF_std = df_830_830eq_APOFF['std_830_res'].loc[mask_low_ppm].std(ddof=1)
-    print(f'Standard deviation of APOFF between 0 and 800ppm: {APOFF_std}ppm')
+    # alpha = 0.05  # significance level = 5% 
+    # # df = 5  # degrees of freedom
+    # mask_low_ppm = (df_830_830eq_APOFF['gas_standard'] >= 0.0) & \
+    #     (df_830_830eq_APOFF['gas_standard'] <= 800.0)
+    # dof_APOFF = len(df_830_830eq_APOFF.loc[mask_low_ppm])-1  # degrees of freedom                                     
+    # v = t.ppf(1 - alpha/2, dof_APOFF) 
+    # print(f'v: {v}, dof: {dof_APOFF}')
+    # res_mean_APOFF = df_830_830eq_APOFF['std_830_res'].loc[mask_low_ppm].mean()
+    # res_standard_error_APOFF = df_830_830eq_APOFF['std_830_res'].loc[mask_low_ppm].sem(ddof=1)
+    # plus_or_minus = v*res_standard_error_APOFF
+    # print(f'Mean APOFF residual between 0 and 750ppm: {res_mean_APOFF} +/- {plus_or_minus}ppm, 95% confidence')
+    # APOFF_std = df_830_830eq_APOFF['std_830_res'].loc[mask_low_ppm].std(ddof=1)
+    # print(f'Standard deviation of APOFF between 0 and 800ppm: {APOFF_std}ppm')
 
-    mask_low_ppm = (df_830_830eq_EPOFF['gas_standard'] >= 0.0) & \
-        (df_830_830eq_EPOFF['gas_standard'] <= 800.0)
-    dof_EPOFF = len(df_830_830eq_EPOFF.loc[mask_low_ppm])-1  # degrees of freedom                                     
-    v = t.ppf(1 - alpha/2, dof_EPOFF)
-    print(f'v: {v}, dof: {dof_EPOFF}')
-    res_mean_EPOFF = df_830_830eq_EPOFF['std_830_res'].loc[mask_low_ppm].mean()
-    res_standard_error_EPOFF = df_830_830eq_EPOFF['std_830_res'].loc[mask_low_ppm].sem(ddof=1)
-    plus_or_minus = v*res_standard_error_EPOFF
-    print(f'Mean EPOFF residual between 0 and 750ppm: {res_mean_EPOFF} +/- {plus_or_minus}ppm, 95% confidence')
-    EPOFF_std = df_830_830eq_EPOFF['std_830_res'].loc[mask_low_ppm].std(ddof=1)
-    print(f'standard deviation of EPOFF between 0 and 800ppm: {EPOFF_std}ppm')
+    # mask_low_ppm = (df_830_830eq_EPOFF['gas_standard'] >= 0.0) & \
+    #     (df_830_830eq_EPOFF['gas_standard'] <= 800.0)
+    # dof_EPOFF = len(df_830_830eq_EPOFF.loc[mask_low_ppm])-1  # degrees of freedom                                     
+    # v = t.ppf(1 - alpha/2, dof_EPOFF)
+    # print(f'v: {v}, dof: {dof_EPOFF}')
+    # res_mean_EPOFF = df_830_830eq_EPOFF['std_830_res'].loc[mask_low_ppm].mean()
+    # res_standard_error_EPOFF = df_830_830eq_EPOFF['std_830_res'].loc[mask_low_ppm].sem(ddof=1)
+    # plus_or_minus = v*res_standard_error_EPOFF
+    # print(f'Mean EPOFF residual between 0 and 750ppm: {res_mean_EPOFF} +/- {plus_or_minus}ppm, 95% confidence')
+    # EPOFF_std = df_830_830eq_EPOFF['std_830_res'].loc[mask_low_ppm].std(ddof=1)
+    # print(f'standard deviation of EPOFF between 0 and 800ppm: {EPOFF_std}ppm')
 
     df_APOFF_group = df_830_830eq_APOFF.groupby('gas_standard')
     df_APOFF_group_stats = df_APOFF_group['std_830_res'].agg(['mean','std','count','sem'])
 
     mean_plus_or_minus_list = []
+    alpha = 0.05
     for idx, row in df_APOFF_group_stats.iterrows():
         #val = row['count']
         #print(f'type(row[\'count\']) = {type(val)}')
@@ -1935,34 +1946,34 @@ def plot_and_produce_report_w_extra_checks(sn,path_to_data,validation_text_filen
     alpha = 0.05  # significance level = 5% 
     # df = 5  # degrees of freedom
     mask_low_ppm = (df_830_830eq_APOFF['gas_standard'] >= 0.0) & \
-        (df_830_830eq_APOFF['gas_standard'] <= 800.0)
+        (df_830_830eq_APOFF['gas_standard'] <= 775.0)
     dof_APOFF = len(df_830_830eq_APOFF.loc[mask_low_ppm])-1  # degrees of freedom                                     
     v = t.ppf(1 - alpha/2, dof_APOFF) 
     print(f'v: {v}, dof: {dof_APOFF}')
     res_mean_APOFF = df_830_830eq_APOFF['std_830_res'].loc[mask_low_ppm].mean()
     res_standard_error_APOFF = df_830_830eq_APOFF['std_830_res'].loc[mask_low_ppm].sem(ddof=1)
     plus_or_minus_APOFF = v*res_standard_error_APOFF
-    print(f"""Mean APOFF residual between 0 and 750ppm: {res_mean_APOFF} 
+    print(f"""Mean APOFF residual between 0 and 775ppm: {res_mean_APOFF} 
     +/- {plus_or_minus_APOFF}ppm, 95% confidence""")
     APOFF_std = df_830_830eq_APOFF['std_830_res'].loc[mask_low_ppm].std(ddof=1)
-    print(f'Standard deviation of APOFF between 0 and 800ppm: {APOFF_std}ppm')
+    print(f'Standard deviation of APOFF between 0 and 775ppm: {APOFF_std}ppm')
 
     mask_low_ppm = (df_830_830eq_EPOFF['gas_standard'] >= 0.0) & \
-        (df_830_830eq_EPOFF['gas_standard'] <= 750.0)
+        (df_830_830eq_EPOFF['gas_standard'] <= 775.0)
     dof_EPOFF = len(df_830_830eq_EPOFF.loc[mask_low_ppm])-1  # degrees of freedom                                     
     v = t.ppf(1 - alpha/2, dof_EPOFF)
     print(f'v: {v}, dof: {dof_EPOFF}')
     res_mean_EPOFF = df_830_830eq_EPOFF['std_830_res'].loc[mask_low_ppm].mean()
     res_standard_error_EPOFF = df_830_830eq_EPOFF['std_830_res'].loc[mask_low_ppm].sem(ddof=1)
     plus_or_minus_EPOFF = v*res_standard_error_EPOFF
-    print(f"""Mean EPOFF residual between 0 and 750ppm: {res_mean_EPOFF} 
+    print(f"""Mean EPOFF residual between 0 and 775ppm: {res_mean_EPOFF} 
     +/- {plus_or_minus_EPOFF}ppm, 95% confidence""")
     EPOFF_std = df_830_830eq_EPOFF['std_830_res'].loc[mask_low_ppm].std(ddof=1)
-    print(f'standard deviation of EPOFF between 0 and 800ppm: {EPOFF_std}ppm')
+    print(f'standard deviation of EPOFF between 0 and 775ppm: {EPOFF_std}ppm')
 
-    df_0_thru_750_range_EPOFF = pd.DataFrame({'res_mean':[res_mean_EPOFF],\
+    df_0_thru_775_range_EPOFF = pd.DataFrame({'res_mean':[res_mean_EPOFF],\
         'conf_95':[plus_or_minus_EPOFF]})
-    df_0_thru_750_range_APOFF = pd.DataFrame({'res_mean':[res_mean_APOFF],\
+    df_0_thru_775_range_APOFF = pd.DataFrame({'res_mean':[res_mean_APOFF],\
         'conf_95':[plus_or_minus_APOFF]})
 
     df_EPOFF_t_corr_summary_stats, df_APOFF_t_corr_summary_stats, \
@@ -1978,8 +1989,8 @@ def plot_and_produce_report_w_extra_checks(sn,path_to_data,validation_text_filen
         tuple_of_df_4_tables,validation_text_filename,fault_text)
     else:
         tuple_of_df_4_tables=(df_APOFF_t_corr_summary_stats,df_APOFF_not_t_corr_summary_stats,\
-            df_EPOFF_t_corr_summary_stats,df_EPOFF_not_t_corr_summary_stats,df_0_thru_750_range_APOFF,\
-            df_0_thru_750_range_EPOFF)
+            df_EPOFF_t_corr_summary_stats,df_EPOFF_not_t_corr_summary_stats,df_0_thru_775_range_APOFF,\
+            df_0_thru_775_range_EPOFF)
         generate_bigger_validation_report_reordered_Feb_2022(reports_path,sn,date_range,figure_filenames_and_sizes,\
         tuple_of_df_4_tables,validation_text_filename,fault_text)
 

@@ -252,14 +252,14 @@ def generate_validation_report(output_folder,sn,date_range,figure_filenames_and_
 def myLaterPages(canvas, doc):
     canvas.saveState()
     canvas.setFont('Times-Roman',9)
-    pageinfo = "ASVCO2 Gas Val. - v0.0.6"
+    pageinfo = "ASVCO2 Gas Val. - v0.0.7"
     canvas.drawString(inch, 0.75 * inch, "Page %d, %s" % (doc.page, pageinfo))
     canvas.restoreState()
 
 def myFirstPage(canvas, doc):
     canvas.saveState()
-    Title = "ASVCO2 Gas Validation Automatic Report - v0.0.6"
-    pageinfo = "ASVCO2 Gas Val. - v0.0.6"
+    Title = "ASVCO2 Gas Validation Automatic Report - v0.0.7"
+    pageinfo = "ASVCO2 Gas Val. - v0.0.7"
     PAGE_HEIGHT=defaultPageSize[1]; PAGE_WIDTH=defaultPageSize[0]
     canvas.setFont('Times-Roman',9)
     canvas.drawCentredString(PAGE_WIDTH/3.3333333, PAGE_HEIGHT-78, Title)
@@ -1624,7 +1624,7 @@ def df_to_reportlab_table_with_pf(df_in, any_single_failure_flag, calc_type='Tco
     header[5] = Paragraph('stdev<br/>upper<br/>limit')
     header[6] = Paragraph('stdev<br/>pass<br/>or fail')
     header[8] = Paragraph('max<br/>upper<br/>limit')
-    header[9] = Paragraph('max<br/>upper<br/>limit')
+    header[9] = Paragraph('max<br/>pass<br/>or fail')
     data_pf_APOFF_recalc.append(header)
     #print(df_mean_stdev_tcorr_2.columns)
     #print(df_mean_stdev_tcorr_2.columns.values)
@@ -1772,7 +1772,7 @@ def generate_bigger_validation_report_reordered_Feb_2022(output_folder,sn,date_r
     any_single_failure_flag=False
 
     #### Feb 2022, new stuff, vaguely IAW Adrienne Sutton's direction ####
-    data_0_750_APOFF = []
+    data_0_775_APOFF = []
     df_mean_w_95_conf_interval_APOFF = tuple_of_df_4_tables[4]
     header = ['range','mean residual with 95% confidence','upper limit','PASS/FAIL']
     res_mean = df_mean_w_95_conf_interval_APOFF.loc[0,'res_mean']
@@ -1781,33 +1781,33 @@ def generate_bigger_validation_report_reordered_Feb_2022(output_folder,sn,date_r
     upper_limit_APOFF = 2.0
     if ( (res_mean+res_conf_95) > upper_limit_APOFF or \
         (res_mean-res_conf_95) < (-upper_limit_APOFF) ):
-        APOFF_0_750_pf = "FAIL"
+        APOFF_0_775_pf = "FAIL"
     else:
-        APOFF_0_750_pf = "PASS"
-    data_0_750_APOFF.append(header)
-    data_0_750_APOFF.append(['0ppm thru 750ppm',res_mean_95_txt,\
-        str(upper_limit_APOFF),APOFF_0_750_pf])
+        APOFF_0_775_pf = "PASS"
+    data_0_775_APOFF.append(header)
+    data_0_775_APOFF.append(['0ppm thru 775ppm',res_mean_95_txt,\
+        str(upper_limit_APOFF),APOFF_0_775_pf])
 
-    t_0_750_APOFF=Table(data_0_750_APOFF)
-    t_0_750_APOFF_table_style=[('ALIGN',(0,0),(4,2),'LEFT'),\
+    t_0_775_APOFF=Table(data_0_775_APOFF)
+    t_0_775_APOFF_table_style=[('ALIGN',(0,0),(4,2),'LEFT'),\
         ('TEXTCOLOR',(0,0),(4,2), colors.black),\
         ('INNERGRID', (0,0), (4,2), 0.25, colors.black),\
         ('BOX', (0,0), (4,2), 0.25, colors.black)]
-    if ( APOFF_0_750_pf == "FAIL"):
-        t_0_750_APOFF_table_style.append(('TEXTCOLOR',(3,1),(3,1),\
+    if ( APOFF_0_775_pf == "FAIL"):
+        t_0_775_APOFF_table_style.append(('TEXTCOLOR',(3,1),(3,1),\
                     colors.red))
     else:
-        t_0_750_APOFF_table_style.append(('TEXTCOLOR',(3,1),(3,1),\
+        t_0_775_APOFF_table_style.append(('TEXTCOLOR',(3,1),(3,1),\
                     colors.green))
 
-    document.append(Paragraph('APOFF Pass/Fail results for 0ppm through 750ppm gas standard:'))
+    document.append(Paragraph('APOFF Pass/Fail results for 0ppm through 775ppm gas standard:'))
     document.append(Spacer(6*inch,0.1*inch))
-    t_0_750_APOFF.setStyle(t_0_750_APOFF_table_style)
-    document.append(t_0_750_APOFF)
+    t_0_775_APOFF.setStyle(t_0_775_APOFF_table_style)
+    document.append(t_0_775_APOFF)
     document.append(Spacer(6*inch,0.1*inch))
 
     #### Feb 2022, new stuff, vaguely IAW Adrienne Sutton's direction ####
-    data_0_750_EPOFF = []
+    data_0_775_EPOFF = []
     df_mean_w_95_conf_interval_EPOFF = tuple_of_df_4_tables[5]
     header = ['range','mean residual with 95% confidence','upper limit','PASS/FAIL']
     res_mean = df_mean_w_95_conf_interval_EPOFF.loc[0,'res_mean']
@@ -1816,29 +1816,29 @@ def generate_bigger_validation_report_reordered_Feb_2022(output_folder,sn,date_r
     upper_limit_EPOFF = 2.0
     if ( (res_mean+res_conf_95) > upper_limit_EPOFF or \
         (res_mean-res_conf_95) < (-upper_limit_EPOFF) ):
-        EPOFF_0_750_pf = "FAIL"
+        EPOFF_0_775_pf = "FAIL"
     else:
-        EPOFF_0_750_pf = "PASS"
-    data_0_750_EPOFF.append(header)
-    data_0_750_EPOFF.append(['0ppm thru 750ppm',res_mean_95_txt,\
-        str(upper_limit_EPOFF),EPOFF_0_750_pf])
+        EPOFF_0_775_pf = "PASS"
+    data_0_775_EPOFF.append(header)
+    data_0_775_EPOFF.append(['0ppm thru 775ppm',res_mean_95_txt,\
+        str(upper_limit_EPOFF),EPOFF_0_775_pf])
 
-    t_0_750_EPOFF=Table(data_0_750_EPOFF)
-    t_0_750_EPOFF_table_style=[('ALIGN',(0,0),(4,2),'LEFT'),\
+    t_0_775_EPOFF=Table(data_0_775_EPOFF)
+    t_0_775_EPOFF_table_style=[('ALIGN',(0,0),(4,2),'LEFT'),\
         ('TEXTCOLOR',(0,0),(4,2), colors.black),\
         ('INNERGRID', (0,0), (4,2), 0.25, colors.black),\
         ('BOX', (0,0), (4,2), 0.25, colors.black)]
-    if ( EPOFF_0_750_pf == "FAIL"):
-        t_0_750_EPOFF_table_style.append(('TEXTCOLOR',(3,1),(3,1),\
+    if ( EPOFF_0_775_pf == "FAIL"):
+        t_0_775_EPOFF_table_style.append(('TEXTCOLOR',(3,1),(3,1),\
                     colors.red))
     else:
-        t_0_750_EPOFF_table_style.append(('TEXTCOLOR',(3,1),(3,1),\
+        t_0_775_EPOFF_table_style.append(('TEXTCOLOR',(3,1),(3,1),\
                     colors.green))
 
-    document.append(Paragraph('EPOFF Pass/Fail results for 0ppm through 750ppm gas standard:'))
+    document.append(Paragraph('EPOFF Pass/Fail results for 0ppm through 775ppm gas standard:'))
     document.append(Spacer(6*inch,0.1*inch))
-    t_0_750_EPOFF.setStyle(t_0_750_EPOFF_table_style)
-    document.append(t_0_750_EPOFF)
+    t_0_775_EPOFF.setStyle(t_0_775_EPOFF_table_style)
+    document.append(t_0_775_EPOFF)
     document.append(Spacer(6*inch,0.1*inch))
 
     n_std_dev=1  # for combined only number of standard deviations from the mean to set pass fail criteria
@@ -1851,7 +1851,7 @@ def generate_bigger_validation_report_reordered_Feb_2022(output_folder,sn,date_r
             " please see the end of this report for details.</font>",\
                 ParagraphStyle(name='Header12pt',fontSize=12)))
     else:
-        document.append(Paragraph("Range Check: All values were found to be out in range",
+        document.append(Paragraph("Range Check: All values were found to be in range",
                 ParagraphStyle(name='Header12pt',fontSize=12)))
 
     ref1_text="""[1] Sutton, A. J., et al. (2014) A high-frequency atmospheric and seawater pCO2 data set from 
