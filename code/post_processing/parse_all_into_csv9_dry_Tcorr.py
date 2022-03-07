@@ -933,7 +933,7 @@ def parse_all_file_df_w_summary_v2(filename):
     else:
         raise Exception('No serial number entered in system report from {filename}, cannot continue.')
     
-    sys_rep = all_update_missing_v1_8(sys_rep,ASVCO2_sn)  #new for v2
+    #sys_rep = all_update_missing_v1_8(sys_rep,ASVCO2_sn)  #new for v2
 
     #coeff_df = loadASVall_coeff(filename)
     coeff_df = loadASVall_coeff_with_dates(filename)  #new for v2
@@ -1527,6 +1527,15 @@ def val_df_make_temp_and_dry_correction_v2(super_big_val_df,big_stats_df):
     # pd.reset_option('max_columns')
     CO2kzero_col_num = super_big_val_df.columns.get_loc('CO2kzero')
     print(f'CO2kzero_col_num = {CO2kzero_col_num}')
+
+    # pd.set_option('max_columns',None)
+    # print('first five rows of timestamps from temp_data')
+    # print(temp_data[['Timestamp','State']].head())
+    # print('first twenty rows of timestamps from super_big_val_df')
+    # print(super_big_val_df.loc[0:19,['datetime','mode']])
+    # pd.reset_option('max_columns')
+
+
 
     S_0_idx = super_big_val_df.columns.get_loc('CO2kspan')
     S_1_idx = super_big_val_df.columns.get_loc('CO2kspan2')
@@ -2245,104 +2254,104 @@ def val_df_add_range_check(super_big_val_df):
     
     return super_big_val_df
 
-def val_update_missing_v1_8(config_stuff,sn):
+# def val_update_missing_v1_8(config_stuff,sn):
 
-    list_of_applicable_sn = [
-        "3CADC7573",
-        "3CADC7565",
-        "3CA8A2538",
-        "3CA8A2535",
-        "3CA8A2533",
-        "3CADC7571",
-        "3CB942928",
-        "3CB94292E",
-        "3CB94292C",
-        "3CD6D1DD5"]
+#     list_of_applicable_sn = [
+#         "3CADC7573",
+#         "3CADC7565",
+#         "3CA8A2538",
+#         "3CA8A2535",
+#         "3CA8A2533",
+#         "3CADC7571",
+#         "3CB942928",
+#         "3CB94292E",
+#         "3CB94292C",
+#         "3CD6D1DD5"]
 
-    if ( sn in list_of_applicable_sn ):
-        # read in json file from config folder and look up parameters by serial number
-        PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        json_file = open(PROJECT_ROOT + '/code/post_processing/config/missing_from_Saildrone_v1_8.json','r',encoding='utf-8')
-        missing_from_Saildrone_v1_8 = json.load(json_file)
-        json_file.close()
+#     if ( sn in list_of_applicable_sn ):
+#         # read in json file from config folder and look up parameters by serial number
+#         PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+#         json_file = open(PROJECT_ROOT + '/code/post_processing/config/missing_from_Saildrone_v1_8.json','r',encoding='utf-8')
+#         missing_from_Saildrone_v1_8 = json.load(json_file)
+#         json_file.close()
 
-        # maybe_missing = {'secondaryspan_calibrated_temperature': span2_temp,  # unique
-        # 'secondaryspan_calibrated_spanconcentration': 502.76,
-        # 'last_secondaryspan_temperaturedependantslope': '2021-02-22T00:00:00Z',  
-        # 'secondaryspan_temperaturedependantslope':float(span2_20deg_cal2_temp_licor.co2kspan2.values),  # unique
-        # 'secondaryspan_temperaturedependantslopefit':float(oventesta_licor_cal2_span2.R2.values),  # unique
-        # 'secondaryspan_calibrated_rh': 1.27283262,
-        # 'ASVCO2_secondaryspan2_concentration': 1994.25,
-        # 'last_ASVCO2_validation': this_last_ASVCO2_validation,  # unique
-        # 'pressure_bias': np.NaN,
-        # 'last_pressure_bias_measured' : '', # format of '0001-01-01T00:00:00Z',
-        # 'ASVCO2_ATRH_serial': '', # format of 'XXXXXXXXX',
-        # 'ASVCO2_O2_serial':'EK59499036', # unique
-        # 'ASVCO2_manufacturer': 'PMEL',
-        # 'secondaryspan_calibrated_spanserialnumber':'JA02448',
-        # 'ASVCO2_secondaryspan_serialnumber':'CB11490',
-        # 'ASVCO2_span_serialnumber':'CC738196',
-        # 'last_secondaryspan_calibration':'2021-02-22T00:00:00Z'}
+#         # maybe_missing = {'secondaryspan_calibrated_temperature': span2_temp,  # unique
+#         # 'secondaryspan_calibrated_spanconcentration': 502.76,
+#         # 'last_secondaryspan_temperaturedependantslope': '2021-02-22T00:00:00Z',  
+#         # 'secondaryspan_temperaturedependantslope':float(span2_20deg_cal2_temp_licor.co2kspan2.values),  # unique
+#         # 'secondaryspan_temperaturedependantslopefit':float(oventesta_licor_cal2_span2.R2.values),  # unique
+#         # 'secondaryspan_calibrated_rh': 1.27283262,
+#         # 'ASVCO2_secondaryspan2_concentration': 1994.25,
+#         # 'last_ASVCO2_validation': this_last_ASVCO2_validation,  # unique
+#         # 'pressure_bias': np.NaN,
+#         # 'last_pressure_bias_measured' : '', # format of '0001-01-01T00:00:00Z',
+#         # 'ASVCO2_ATRH_serial': '', # format of 'XXXXXXXXX',
+#         # 'ASVCO2_O2_serial':'EK59499036', # unique
+#         # 'ASVCO2_manufacturer': 'PMEL',
+#         # 'secondaryspan_calibrated_spanserialnumber':'JA02448',
+#         # 'ASVCO2_secondaryspan_serialnumber':'CB11490',
+#         # 'ASVCO2_span_serialnumber':'CC738196',
+#         # 'last_secondaryspan_calibration':'2021-02-22T00:00:00Z'}
 
-        maybe_missing = missing_from_Saildrone_v1_8[sn]
-        for k, v in config_stuff.items():
-            for kk, vv in maybe_missing.items():
-                if (kk not in config_stuff[k]):
-                    config_stuff[k][kk] = vv
+#         maybe_missing = missing_from_Saildrone_v1_8[sn]
+#         for k, v in config_stuff.items():
+#             for kk, vv in maybe_missing.items():
+#                 if (kk not in config_stuff[k]):
+#                     config_stuff[k][kk] = vv
         
-    else:
-        raise Exception (f'the serial number {sn} is not in the list of applicable serial numbers')
+#     else:
+#         raise Exception (f'the serial number {sn} is not in the list of applicable serial numbers')
 
-    return config_stuff
+#     return config_stuff
 
-def all_update_missing_v1_8(sys_rep,sn):
+# def all_update_missing_v1_8(sys_rep,sn):
 
-    list_of_applicable_sn = [
-        "3CADC7573",
-        "3CADC7565",
-        "3CA8A2538",
-        "3CA8A2535",
-        "3CA8A2533",
-        "3CADC7571",
-        "3CB942928",
-        "3CB94292E",
-        "3CB94292C",
-        "3CD6D1DD5"]
+#     list_of_applicable_sn = [
+#         "3CADC7573",
+#         "3CADC7565",
+#         "3CA8A2538",
+#         "3CA8A2535",
+#         "3CA8A2533",
+#         "3CADC7571",
+#         "3CB942928",
+#         "3CB94292E",
+#         "3CB94292C",
+#         "3CD6D1DD5"]
 
-    if ( sn in list_of_applicable_sn ):
-        # read in json file from config folder and look up parameters by serial number
-        PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        json_file = open(PROJECT_ROOT + '/code/post_processing/config/missing_from_Saildrone_v1_8.json','r',encoding='utf-8')
-        missing_from_Saildrone_v1_8 = json.load(json_file)
-        json_file.close()
+#     if ( sn in list_of_applicable_sn ):
+#         # read in json file from config folder and look up parameters by serial number
+#         PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+#         json_file = open(PROJECT_ROOT + '/code/post_processing/config/missing_from_Saildrone_v1_8.json','r',encoding='utf-8')
+#         missing_from_Saildrone_v1_8 = json.load(json_file)
+#         json_file.close()
 
-        # maybe_missing = {'secondaryspan_calibrated_temperature': span2_temp,  # unique
-        # 'secondaryspan_calibrated_spanconcentration': 502.76,
-        # 'last_secondaryspan_temperaturedependantslope': '2021-02-22T00:00:00Z',  
-        # 'secondaryspan_temperaturedependantslope':float(span2_20deg_cal2_temp_licor.co2kspan2.values),  # unique
-        # 'secondaryspan_temperaturedependantslopefit':float(oventesta_licor_cal2_span2.R2.values),  # unique
-        # 'secondaryspan_calibrated_rh': 1.27283262,
-        # 'ASVCO2_secondaryspan2_concentration': 1994.25,
-        # 'last_ASVCO2_validation': this_last_ASVCO2_validation,  # unique
-        # 'pressure_bias': np.NaN,
-        # 'last_pressure_bias_measured' : '', # format of '0001-01-01T00:00:00Z',
-        # 'ASVCO2_ATRH_serial': '', # format of 'XXXXXXXXX',
-        # 'ASVCO2_O2_serial':'EK59499036', # unique
-        # 'ASVCO2_manufacturer': 'PMEL',
-        # 'secondaryspan_calibrated_spanserialnumber':'JA02448',
-        # 'ASVCO2_secondaryspan_serialnumber':'CB11490',
-        # 'ASVCO2_span_serialnumber':'CC738196',
-        # 'last_secondaryspan_calibration':'2021-02-22T00:00:00Z'}
+#         # maybe_missing = {'secondaryspan_calibrated_temperature': span2_temp,  # unique
+#         # 'secondaryspan_calibrated_spanconcentration': 502.76,
+#         # 'last_secondaryspan_temperaturedependantslope': '2021-02-22T00:00:00Z',  
+#         # 'secondaryspan_temperaturedependantslope':float(span2_20deg_cal2_temp_licor.co2kspan2.values),  # unique
+#         # 'secondaryspan_temperaturedependantslopefit':float(oventesta_licor_cal2_span2.R2.values),  # unique
+#         # 'secondaryspan_calibrated_rh': 1.27283262,
+#         # 'ASVCO2_secondaryspan2_concentration': 1994.25,
+#         # 'last_ASVCO2_validation': this_last_ASVCO2_validation,  # unique
+#         # 'pressure_bias': np.NaN,
+#         # 'last_pressure_bias_measured' : '', # format of '0001-01-01T00:00:00Z',
+#         # 'ASVCO2_ATRH_serial': '', # format of 'XXXXXXXXX',
+#         # 'ASVCO2_O2_serial':'EK59499036', # unique
+#         # 'ASVCO2_manufacturer': 'PMEL',
+#         # 'secondaryspan_calibrated_spanserialnumber':'JA02448',
+#         # 'ASVCO2_secondaryspan_serialnumber':'CB11490',
+#         # 'ASVCO2_span_serialnumber':'CC738196',
+#         # 'last_secondaryspan_calibration':'2021-02-22T00:00:00Z'}
 
-        maybe_missing = missing_from_Saildrone_v1_8[sn]
-        for kk, vv in maybe_missing.items():
-                if (kk not in sys_rep):
-                    sys_rep[kk] = vv
+#         maybe_missing = missing_from_Saildrone_v1_8[sn]
+#         for kk, vv in maybe_missing.items():
+#                 if (kk not in sys_rep):
+#                     sys_rep[kk] = vv
         
-    else:
-        raise Exception (f'the serial number {sn} is not in the list of applicable serial numbers')
+#     else:
+#         raise Exception (f'the serial number {sn} is not in the list of applicable serial numbers')
 
-    return sys_rep
+#     return sys_rep
 
 def load_Val_file(val_filename,big_dry_df=pd.DataFrame(),\
     big_stats_df=pd.DataFrame(),big_flags_df=pd.DataFrame(),\
@@ -2364,8 +2373,8 @@ def load_Val_file(val_filename,big_dry_df=pd.DataFrame(),\
 
     # unique to Saildrone serial numbers where things like secondaryspan_calibrated_spanserialnumber
     # were not output by the microcontroller.
-    this_sn = config_stuff[list(config_stuff.keys())[0]]['serial']
-    config_stuff = val_update_missing_v1_8(config_stuff,this_sn)
+    # this_sn = config_stuff[list(config_stuff.keys())[0]]['serial']
+    # config_stuff = val_update_missing_v1_8(config_stuff,this_sn)
 
     #### New stuff to fix "nan" issues found in data from 3CADC7565 ####
     bigDictionary = val_fix_nan_in_dict(bigDictionary)
@@ -2683,7 +2692,6 @@ def extract_summary_and_raw_to_csv(sn,path_to_data,validation_text_filename):
                 COEFF_DRY_FLAGS_found_in_file =True
             f.close()
             del f,file_text
-
         if ( COEFF_DRY_FLAGS_found_in_file ):
             df_file = parse_all_file_df_w_summary_v2(filename)
             df_dry_sync, df_dry = loadASVall_dry(filename)

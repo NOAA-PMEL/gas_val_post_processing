@@ -6,3 +6,5 @@ mode_and_gas_parsed_from_val_file.json
 mode_and_gas_stuff_from_val_file.json
 other_stuff_from_val_file.json
 scratchwork.py
+parsed_data_pascal_style.json
+parsed_data_w_other_stuff_pascal_style.json

@@ -25,7 +25,7 @@ import sys
 import pprint
 import json
 from scipy.stats import t
-from special_functions import dry_correction
+from special_functions import dry_correction  # need an udpate import statement for python 3.10, 3/3/2022
 import datetime as dt
 
 
@@ -488,6 +488,28 @@ def get_glob_pattern(validation_text_filename):
 
     return glob_pattern
 
+def all_filename_is_current(validation_text_filename,all_filename):
+    m_all=re.search(r'(\d{8})_(\d{6})\.txt',all_filename)  # 8 digits, underscore and 6 digits
+    m_val = re.search(r'.*(\d{8})-(\d{6})\.txt',validation_text_filename)
+    is_current_test = False
+    if (m_all and m_val):
+        all_year_month_day_str = m_all.groups()[0]
+        all_num_yr_mo_dd = float(all_year_month_day_str)
+        val_year_month_day_str = m_val.groups()[0]
+        val_num_yr_mo_dd = float(val_year_month_day_str)
+        all_hh_mm_ss_str = m_all.groups()[1]
+        all_num_hh_mm_ss = float(all_hh_mm_ss_str)
+        val_hh_mm_ss_str = m_val.groups()[1]
+        val_num_hh_mm_ss = float(val_hh_mm_ss_str)
+        if ( (all_num_yr_mo_dd - val_num_yr_mo_dd) >= 0 and \
+            (all_num_hh_mm_ss - val_num_hh_mm_ss) >= 0 ):
+            is_current_test = True
+        else:
+            is_current_test = False
+    else:
+        is_current_test = False
+    return is_current_test 
+
 def extra_range_checks(filename,validation_text_filename):
     df_flags = loadASVall_flags(filename)
     df_stats = loadASVall_stats(filename)
@@ -596,11 +618,11 @@ def extra_range_checks(filename,validation_text_filename):
     
 
     #### New stuff to avoid doing gaslist ####
-    # bigDictionary, config_stuff, mode_and_gas_stuff, flush_stuff = \
-    #     load_Val_File_into_dicts_v3(validation_text_filename)
-
     bigDictionary, config_stuff, mode_and_gas_stuff, flush_stuff = \
-        load_Val_File_into_dicts_v3(validation_text_filename,timestamp_mode='Unix epoch, days')
+        load_Val_File_into_dicts_v3(validation_text_filename)
+
+    # bigDictionary, config_stuff, mode_and_gas_stuff, flush_stuff = \
+    #     load_Val_File_into_dicts_v3(validation_text_filename,timestamp_mode='Unix epoch, days')
 
     #### New stuff to fix "nan" issues found in data from 3CADC7565 ####
     bigDictionary = val_fix_nan_in_dict(bigDictionary)
@@ -1547,11 +1569,19 @@ def plot_and_produce_report_w_extra_checks(sn,path_to_data,validation_text_filen
     #%%
     #load data here *******************************************
     #filenames=glob.glob(path_to_ALL + '/2021*.txt')
-    #filenames=glob.glob(path_to_ALL + '/20*.txt')
-    glob_pattern = get_glob_pattern(validation_text_filename)
-    filenames=glob.glob(path_to_ALL + dir_sep + glob_pattern)
+    filenames=glob.glob(path_to_ALL + '/20*.txt')
+    #glob_pattern = get_glob_pattern(validation_text_filename)
+    #filenames=glob.glob(path_to_ALL + dir_sep + glob_pattern)
     filenames.sort()
     #print(filenames)
+
+    ### trim filenames so that they are for the current test ###
+    current_test_filenames = []
+    for all_filename in filenames:
+        if ( all_filename_is_current(validation_text_filename,all_filename) ):
+            current_test_filenames.append(all_filename)
+    del filenames
+    filenames = current_test_filenames
 
     # get date range from the filenames
     start_filename_without_path=re.findall(r'\d+_\d+\.txt',filenames[0])[0]
@@ -1634,7 +1664,7 @@ def plot_and_produce_report_w_extra_checks(sn,path_to_data,validation_text_filen
     filenames_ser_APOFF = filenames_ser.loc[0:min_len_APOFF].copy()
     filenames_ser_EPOFF = filenames_ser.loc[0:min_len_EPOFF].copy()
     residuals_830_830eq_APOFF = residuals_830_830eq_APOFF.loc[0:min_len_APOFF,:]
-    residuals_830_830eq_EPOFF = residuals_830_830eq_EPOFF.loc[0:min_len_APOFF,:]
+    residuals_830_830eq_EPOFF = residuals_830_830eq_EPOFF.loc[0:min_len_EPOFF,:]  # typo, corrected 3/3/2022
     print(f'len(filenames_ser_APOFF)={len(filenames_ser_APOFF)}')
     print(f'len(residuals_830_830eq_APOFF)={len(residuals_830_830eq_APOFF)}')
 
@@ -2028,11 +2058,24 @@ if __name__ == "__main__":
     # sn='1005'
     # path_to_data = './data/1005/20210514/'
     # validation_text_filename = '.\\data\\1005\\20210514\\1005_Validation_20210514-004141.txt'
+    sn = '1005'
+    path_to_data = './data/1005_messed_up/'
+    validation_text_filename = '.\\data\\1005_messed_up\\1005_VAL_20220303-003833.txt'
 
     #### 1004 ####
     # sn='1004'
     # path_to_data = './data/1004/20210512/'
     # validation_text_filename = '.\\data\\1004\\20210512\\1004_Validation_20210512-210237.txt'
+
+    #### 1011 ####
+    # sn = '1011'
+    # path_to_data = './data/1011_2022_03_03/'
+    # validation_text_filename = '.\\data\\1011_2022_03_03\\1011_VAL_20220303-003833.txt'
+
+    #### ASVTEST12 ####
+    # sn = 'ASVTEST12'
+    # path_to_data = './data/ASVTEST12_2022_03_03/'
+    # validation_text_filename = '.\\data\\ASVTEST12_2022_03_03\\ASVTEST12_VAL_20220303-003833.txt'
 
     #### 3CA8A2535 ####
     # sn='3CA8A2535'
@@ -2068,9 +2111,9 @@ if __name__ == "__main__":
     # validation_text_filename = '.\\data\\3CB94292E\\3CB94292E_Validation_20210921-223759.txt'
 
     #### XYXYXYXY #####
-    sn='XYXYXYXY'
-    path_to_data='./data/XYXYXYXY/'
-    validation_text_filename='.\\data\\XYXYXYXY\\XYXYXYXY_Validation_20210915-001423.txt'
+    # sn='XYXYXYXY'
+    # path_to_data='./data/XYXYXYXY/'
+    # validation_text_filename='.\\data\\XYXYXYXY\\XYXYXYXY_Validation_20210915-001423.txt'
     
     # plot_and_produce_report(sn,path_to_data,validation_text_filename)
 
