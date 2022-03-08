@@ -501,8 +501,9 @@ def all_filename_is_current(validation_text_filename,all_filename):
         all_num_hh_mm_ss = float(all_hh_mm_ss_str)
         val_hh_mm_ss_str = m_val.groups()[1]
         val_num_hh_mm_ss = float(val_hh_mm_ss_str)
-        if ( (all_num_yr_mo_dd - val_num_yr_mo_dd) >= 0 and \
-            (all_num_hh_mm_ss - val_num_hh_mm_ss) >= 0 ):
+        if ( ((all_num_yr_mo_dd - val_num_yr_mo_dd) == 0 and \
+            (all_num_hh_mm_ss - val_num_hh_mm_ss) >= 0) or \
+            (all_num_yr_mo_dd - val_num_yr_mo_dd) > 0 ):
             is_current_test = True
         else:
             is_current_test = False
@@ -1573,7 +1574,7 @@ def plot_and_produce_report_w_extra_checks(sn,path_to_data,validation_text_filen
     #glob_pattern = get_glob_pattern(validation_text_filename)
     #filenames=glob.glob(path_to_ALL + dir_sep + glob_pattern)
     filenames.sort()
-    #print(filenames)
+    print(filenames)
 
     ### trim filenames so that they are for the current test ###
     current_test_filenames = []
@@ -1582,6 +1583,8 @@ def plot_and_produce_report_w_extra_checks(sn,path_to_data,validation_text_filen
             current_test_filenames.append(all_filename)
     del filenames
     filenames = current_test_filenames
+    print('...after all_filename_is_current() filenames are...')
+    print(filenames)
 
     # get date range from the filenames
     start_filename_without_path=re.findall(r'\d+_\d+\.txt',filenames[0])[0]
@@ -1824,6 +1827,8 @@ def plot_and_produce_report_w_extra_checks(sn,path_to_data,validation_text_filen
 
     #number of runs
     n = numberofruns
+    print(f'lengthofrun = {lengthofrun}')
+    print(f'numberofruns = {numberofruns}')
 
     #save plot name as *******************
     #change this, changed by Pascal, 6/22/2021
@@ -2058,9 +2063,13 @@ if __name__ == "__main__":
     # sn='1005'
     # path_to_data = './data/1005/20210514/'
     # validation_text_filename = '.\\data\\1005\\20210514\\1005_Validation_20210514-004141.txt'
-    sn = '1005'
-    path_to_data = './data/1005_messed_up/'
-    validation_text_filename = '.\\data\\1005_messed_up\\1005_VAL_20220303-003833.txt'
+    # sn = '1005'
+    # path_to_data = './data/1005_messed_up/'
+    # validation_text_filename = '.\\data\\1005_messed_up\\1005_VAL_20220303-003833.txt'
+    # sn = '1005'
+    # path_to_data = './data/1005_2_samples/'
+    # validation_text_filename = '.\\data\\1005_2_samples\\1005_VAL_20220307-211254.txt'
+
 
     #### 1004 ####
     # sn='1004'
@@ -2071,11 +2080,17 @@ if __name__ == "__main__":
     # sn = '1011'
     # path_to_data = './data/1011_2022_03_03/'
     # validation_text_filename = '.\\data\\1011_2022_03_03\\1011_VAL_20220303-003833.txt'
+    sn = '1011'
+    path_to_data = './data/1011_2_samples/'
+    validation_text_filename = '.\\data\\1011_2_samples\\1011_VAL_20220307-211254.txt'
 
     #### ASVTEST12 ####
     # sn = 'ASVTEST12'
     # path_to_data = './data/ASVTEST12_2022_03_03/'
     # validation_text_filename = '.\\data\\ASVTEST12_2022_03_03\\ASVTEST12_VAL_20220303-003833.txt'
+    # sn = 'ASVTEST12'
+    # path_to_data = './data/ASVTEST12_2_samples/'
+    # validation_text_filename = '.\\data\\ASVTEST12_2_samples\\ASVTEST12_VAL_20220307-211254.txt'
 
     #### 3CA8A2535 ####
     # sn='3CA8A2535'

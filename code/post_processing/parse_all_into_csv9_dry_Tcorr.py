@@ -2628,8 +2628,9 @@ def all_filename_is_current(validation_text_filename,all_filename):
         all_num_hh_mm_ss = float(all_hh_mm_ss_str)
         val_hh_mm_ss_str = m_val.groups()[1]
         val_num_hh_mm_ss = float(val_hh_mm_ss_str)
-        if ( (all_num_yr_mo_dd - val_num_yr_mo_dd) >= 0 and \
-            (all_num_hh_mm_ss - val_num_hh_mm_ss) >= 0 ):
+        if ( ((all_num_yr_mo_dd - val_num_yr_mo_dd) == 0 and \
+            (all_num_hh_mm_ss - val_num_hh_mm_ss) >= 0) or \
+            (all_num_yr_mo_dd - val_num_yr_mo_dd) > 0 ):
             is_current_test = True
         else:
             is_current_test = False
@@ -2738,10 +2739,11 @@ if __name__ == '__main__':
     #validation_filename = './data/3CB94292E/3CB94292E_Validation_20210921-223759.txt'
     #validation_filename = './data/3CB942928/3CB942928_Validation_20210915-001423.txt'
     #validation_filename = './data/3CD6D1DD5/3CD6D1DD5_Validation_20211005-225409.txt'
-    validation_filename = './data/ASVTEST12_2022_03_03/ASVTEST12_VAL_20220303-003833.txt'
+    #validation_filename = './data/ASVTEST12_2022_03_03/ASVTEST12_VAL_20220303-003833.txt'
+    validation_filename = './data/ASVTEST12_2_samples/ASVTEST12_VAL_20220307-211254.txt'
 
     #### Good stuff ####
-    path_to_data='./data/ASVTEST12_2022_03_03/'
+    path_to_data='./data/ASVTEST12_2_samples/'
     path_to_ALL= path_to_data + 'ALL'
     filenames=glob.glob(path_to_ALL + '/2022*.txt')
     filenames.sort()
@@ -2796,7 +2798,7 @@ if __name__ == '__main__':
     super_big_stats_df = pd.concat(list_of_stats_df,axis=0,ignore_index=True)
     super_big_flags_df = pd.concat(list_of_flags_df,axis=0,ignore_index=True)
     super_big_coeff_sync_df = pd.concat(list_of_coeff_sync_df,axis=0,ignore_index=True)
-    super_big_df.to_csv(path_to_data + 'raw_w_summary_ASVTEST12_2022_03_03.csv', index=False)
+    super_big_df.to_csv(path_to_data + 'raw_w_summary_ASVTEST12_2_samples.csv', index=False)
     #### END Good stuff ####
 
     # pd.set_option('max_columns',None)
@@ -2810,27 +2812,4 @@ if __name__ == '__main__':
     # print(super_big_stats_df.describe(include='all'))
     # pd.reset_option('max_columns')
 
-    super_big_stats_df.to_csv(path_to_data + 'stats_ASVTEST12_2022_03_03.csv', index=False)
-
-
-    super_big_val_df = load_Val_file(validation_filename,super_big_dry_df_sync,\
-        super_big_stats_df,super_big_flags_df,super_big_coeff_sync_df)
-    super_big_val_df.to_csv(path_to_data + 'Report_Summary_parsed_from_every_txt_file_ASVTEST12_2022_03_03.csv',index=False)
-
-    # print('big df timestamp=',super_big_df['time'].iloc[0])
-    # print('val df timestamp=',super_big_val_df['time'].iloc[0])
-    # print('len(big timestamp)=',len(super_big_df['time'].iloc[0]))
-    # print('len(val timestamp)=',len(super_big_val_df['time'].iloc[0]))
-    # for idx, row in super_big_val_df.iterrows():
-    #     target_timestamp = row['time']
-    #     matching = super_big_df['time'] == target_timestamp
-    #     print(super_big_df['time'].loc[matching])
-    # matching = super_big_df['time'] == super_big_val_df['time']
-    # print(matching)
-
-    # df1 = pd.DataFrame(data={'bears':[100,98,96,94],'pigs':""})
-    # df2 = pd.DataFrame(data={'bears':"",'pigs':[64]})
-    # df1 = df1.rename(columns={'bears':'chickens','pigs':'rabbits'})
-    # df2 = df2.rename(columns={'bears':'chickens','pigs':'rabbits'})
-    # df_missing = pd.concat([df1,df2],axis=0,ignore_index=True)
-    # print(df_missing)
+    super_big_stats_df.to_csv(path_to_data + 'stats_ASVTEST12_2_samples.csv', index=False)

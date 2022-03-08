@@ -2619,8 +2619,9 @@ def all_filename_is_current(validation_text_filename,all_filename):
         all_num_hh_mm_ss = float(all_hh_mm_ss_str)
         val_hh_mm_ss_str = m_val.groups()[1]
         val_num_hh_mm_ss = float(val_hh_mm_ss_str)
-        if ( (all_num_yr_mo_dd - val_num_yr_mo_dd) >= 0 and \
-            (all_num_hh_mm_ss - val_num_hh_mm_ss) >= 0 ):
+        if ( ((all_num_yr_mo_dd - val_num_yr_mo_dd) == 0 and \
+            (all_num_hh_mm_ss - val_num_hh_mm_ss) >= 0) or \
+            (all_num_yr_mo_dd - val_num_yr_mo_dd) > 0 ):
             is_current_test = True
         else:
             is_current_test = False
