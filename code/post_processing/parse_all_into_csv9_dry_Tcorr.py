@@ -1526,7 +1526,7 @@ def val_df_make_temp_and_dry_correction_v2(super_big_val_df,big_stats_df):
     # print(temp_data.describe(include='all'))
     # pd.reset_option('max_columns')
     CO2kzero_col_num = super_big_val_df.columns.get_loc('CO2kzero')
-    print(f'CO2kzero_col_num = {CO2kzero_col_num}')
+    #print(f'CO2kzero_col_num = {CO2kzero_col_num}')
 
     # pd.set_option('max_columns',None)
     # print('first five rows of timestamps from temp_data')
@@ -1590,8 +1590,8 @@ def val_df_make_temp_and_dry_correction_v2(super_big_val_df,big_stats_df):
 
     del temp_data
 
-    print('#### After merge inside val_df_make_temp_and_dry correction #####')
-    print(f'super_big_val_df.columns.values = {super_big_val_df.columns.values}')
+    # print('#### After merge inside val_df_make_temp_and_dry correction #####')
+    # print(f'super_big_val_df.columns.values = {super_big_val_df.columns.values}')
 
     return super_big_val_df
 
@@ -1626,7 +1626,7 @@ def val_df_make_temp_and_dry_correction(super_big_val_df,big_stats_df):
     # print(temp_data.describe(include='all'))
     # pd.reset_option('max_columns')
     CO2kzero_col_num = super_big_val_df.columns.get_loc('CO2kzero')
-    print(f'CO2kzero_col_num = {CO2kzero_col_num}')
+    #print(f'CO2kzero_col_num = {CO2kzero_col_num}')
 
     S_0_idx = super_big_val_df.columns.get_loc('CO2kspan')
     S_1_idx = super_big_val_df.columns.get_loc('CO2kspan2')
@@ -1682,8 +1682,8 @@ def val_df_make_temp_and_dry_correction(super_big_val_df,big_stats_df):
 
     del temp_data
 
-    print('#### After merge inside val_df_make_temp_and_dry correction #####')
-    print(f'super_big_val_df.columns.values = {super_big_val_df.columns.values}')
+    # print('#### After merge inside val_df_make_temp_and_dry correction #####')
+    # print(f'super_big_val_df.columns.values = {super_big_val_df.columns.values}')
 
     return super_big_val_df
 
@@ -1703,7 +1703,7 @@ def val_df_reorder_columns(super_big_val_df):
     # #print(f'cols = {cols}')
     
     fw_string = super_big_val_df.loc[0,'ver']
-    print(f'fw_string = {fw_string}')
+    # print(f'fw_string = {fw_string}')
     if ( re.match(r'.*v1\.8.*',fw_string) ):
         span2_conc_name = 'ASVCO2_secondaryspan2_concentration'
     else:
@@ -1832,7 +1832,7 @@ def add_final_summary_rows(super_big_val_df):
     last_two_rows = super_big_val_df.iloc[-2:,:].copy().reset_index()
 
     final_ts_str = super_big_val_df['datetime'].iloc[-1]
-    print(f'finat_ts_str = {final_ts_str}')
+    # print(f'finat_ts_str = {final_ts_str}')
     final_ts_str = final_ts_str.strip()
     #last_whole_sec_idx = re.search(r'\dZ',final_ts_str).span()[0]  # whole seconds here
     #floored_final_ts_str = final_ts_str[:last_whole_sec_idx] + 'Z'
@@ -1961,7 +1961,7 @@ def add_final_summary_rows_v2(super_big_val_df):
     last_twelve_or_more_rows = super_big_val_df.iloc[-2*num_ranges:,:].copy().reset_index()
 
     final_ts_str = super_big_val_df['datetime'].iloc[-1]
-    print(f'finat_ts_str = {final_ts_str}')
+    # print(f'finat_ts_str = {final_ts_str}')
     final_ts_str = final_ts_str.strip()
     #last_whole_sec_idx = re.search(r'\dZ',final_ts_str).span()[0]  # whole seconds here
     #floored_final_ts_str = final_ts_str[:last_whole_sec_idx] + 'Z'
@@ -2067,7 +2067,7 @@ def add_final_summary_rows_v2(super_big_val_df):
     # transform list_of_changes from a list of dictionary into a single large dictionary for
     # integration into pandas
     these_keys = list(list_of_changes[0].keys())
-    print(these_keys)
+    # print(these_keys)
     change = {}
     for k in these_keys:
         change[k] = []
@@ -2082,8 +2082,8 @@ def add_final_summary_rows_v2(super_big_val_df):
     # For unknown reasons, the last_twelve_or_more_rows.update() was failing.
     # Instead, force a manual replacement below.
     temp_df = pd.DataFrame(change)
-    print(f'index for temp_df is {temp_df.index.values}')
-    print(f'index for last_twelve_or_more_rows is {last_twelve_or_more_rows.index.values}')
+    # print(f'index for temp_df is {temp_df.index.values}')
+    # print(f'index for last_twelve_or_more_rows is {last_twelve_or_more_rows.index.values}')
     for col in last_twelve_or_more_rows.columns:
         if col in temp_df.columns:
             #last_twelve_or_more_rows[col].fillna(temp_df[col], inplace=True)
@@ -2105,11 +2105,11 @@ def add_final_summary_rows_v2(super_big_val_df):
     for col in list_of_NaN_cols:
         last_twelve_or_more_rows[col] = [np.NaN]*(2*num_ranges)
 
-    print("!### This is the change !###")
-    pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(change)
-    print("!### This is last_twelve_or_more_rows after update() !###")
-    print(last_twelve_or_more_rows[['datetime'] + list_of_cols_for_stats])
+    # print("!### This is the change !###")
+    # pp = pprint.PrettyPrinter(indent=4)
+    # pp.pprint(change)
+    # print("!### This is last_twelve_or_more_rows after update() !###")
+    # print(last_twelve_or_more_rows[['datetime'] + list_of_cols_for_stats])
 
     #super_big_val_df = super_big_val_df.append(last_two_rows,ignore_index=True)
     super_big_val_df = super_big_val_df.append(last_twelve_or_more_rows,ignore_index=True)
@@ -2381,8 +2381,8 @@ def load_Val_file(val_filename,big_dry_df=pd.DataFrame(),\
     bDkeys = list(bigDictionary.keys())
     typeflow_ave = type(bigDictionary[bDkeys[0]]['Flow_ave'][0])
     flow_ave_example = bigDictionary[bDkeys[0]]['Flow_ave'][0]
-    print(f'type of flow_ave bigDictionary = {typeflow_ave}')
-    print(f'first entry of Flow_ave = {flow_ave_example}')
+    # print(f'type of flow_ave bigDictionary = {typeflow_ave}')
+    # print(f'first entry of Flow_ave = {flow_ave_example}')
 
     # put config_stuff into bigDictionary
     for k, v in config_stuff.items():
@@ -2401,7 +2401,7 @@ def load_Val_file(val_filename,big_dry_df=pd.DataFrame(),\
         list_of_val_df.append(pd.DataFrame(v))
     super_big_val_df = pd.concat(list_of_val_df,axis=0,ignore_index=True)
     #super_big_val_df = super_big_val_df.rename(columns={'datetime':'time'})
-    print('### After pd.concat, first timestamp is = ',super_big_val_df.loc[0,'datetime'])
+    # print('### After pd.concat, first timestamp is = ',super_big_val_df.loc[0,'datetime'])
     
     if ( big_dry_df.empty or big_stats_df.empty or big_flags_df.empty or\
         big_coeff_sync_df.empty):
@@ -2443,8 +2443,8 @@ def load_Val_file(val_filename,big_dry_df=pd.DataFrame(),\
             'CO2kspan_sync':'CO2kspan', 'CO2kspan2_sync':'CO2kspan2'})
         # print('###! After merging big_coeff_df, first timestamp is = ',super_big_val_df.loc[0,'datetime'])
 
-        print('#### After merge inside load_Val_file() ####')
-        print(f'super_big_val_df.columns.values = {super_big_val_df.columns.values}')
+        # print('#### After merge inside load_Val_file() ####')
+        # print(f'super_big_val_df.columns.values = {super_big_val_df.columns.values}')
     else: 
         raise Exception('STATS data provided but not DRY data or vice versa')
 
@@ -2475,8 +2475,8 @@ def load_Val_file(val_filename,big_dry_df=pd.DataFrame(),\
     super_big_val_df = val_df_make_temp_and_dry_correction_v2(super_big_val_df,\
         big_stats_df)
 
-    print('#### After val_df_make_temp_and_dry_correction() inside load_Val_file() ####')
-    print(f'super_big_val_df.columns.values = {super_big_val_df.columns.values}')
+    # print('#### After val_df_make_temp_and_dry_correction() inside load_Val_file() ####')
+    # print(f'super_big_val_df.columns.values = {super_big_val_df.columns.values}')
 
     #drop the new column, updated in val_update_xco2_10XX()
     #super_big_val_df = super_big_val_df.drop(columns=['CO2kspan2_new'])
@@ -2484,10 +2484,10 @@ def load_Val_file(val_filename,big_dry_df=pd.DataFrame(),\
     # Used to do residuals on wet xCO2 columns, but not anymore
     super_big_val_df = val_df_make_dry_residual_columns(super_big_val_df) 
 
-    print('#### After val_df_make_dry_residual_columns() inside load_Val_file() ####')
-    print(f'super_big_val_df.columns.values = {super_big_val_df.columns.values}')
+    # print('#### After val_df_make_dry_residual_columns() inside load_Val_file() ####')
+    # print(f'super_big_val_df.columns.values = {super_big_val_df.columns.values}')
     residual_Tcorr_min = super_big_val_df['residual_Tcorr_ave'].min()
-    print(f'residual_Tcorr_min = {residual_Tcorr_min}')
+    # print(f'residual_Tcorr_min = {residual_Tcorr_min}')
 
     # Add in placeholder for summary columns for final summary
     # These will be populated in add_final_summary_rows()
