@@ -2143,8 +2143,8 @@ def pressure_range_checks(on_state_name,off_state_name,Pdiff_limit,super_big_val
     for idx in range(0,min_len):
         P_diff.append(P_on[idx]-P_off[idx])
         if ( P_diff[idx] < Pdiff_limit ):
-            new_reasons.append(f"""The pressure difference between {on_state_name} 
-            and {off_state_name} is not greater than {Pdiff_limit}kPa. """)
+            new_reasons.append(f"The pressure difference between {on_state_name} \
+                and {off_state_name} is not greater than {Pdiff_limit}kPa. ")
         else:
             new_reasons.append('')
     return new_reasons, f_off
