@@ -480,16 +480,19 @@ def parse_all_file_into_df(filename):
 
     #Pascal, 8/13/2021, choose which gas list to use based upon time string from filename,
     #will need to update this to a more fully featured lookup later
-    time_str=re.search(r'\d{8}_\d{6}\.txt',filename)[0]  #grab 8 digits, underscore and 6 digits
-    year_month_day_str = re.split(r'_',time_str)[0]
-    num_yr_mo_dd = float(year_month_day_str)
-    if ( (20210801 - num_yr_mo_dd) > 0 ):  # if it preceded Aug 1 2021, then used older gaslists
-        if ((20210427 - num_yr_mo_dd) > 0):
-            gaslist=[0, 104.25, 349.79, 552.9, 732.64, 999.51, 1487.06, 1994.25] #552.9 before 4/27
-        else:
-            gaslist=[0, 104.25, 349.79, 506.16, 732.64, 999.51, 1487.06, 1994.25]
-    else:  # use newer gaslist if after Aug 1 2021
-        gaslist=[0, 104.25, 349.79, 494.72, 732.64, 999.51, 1487.06, 1961.39] #update in early Aug 2021
+    # time_str=re.search(r'\d{8}_\d{6}\.txt',filename)[0]  #grab 8 digits, underscore and 6 digits
+    # year_month_day_str = re.split(r'_',time_str)[0]
+    # num_yr_mo_dd = float(year_month_day_str)
+    # if ( (20210801 - num_yr_mo_dd) > 0 ):  # if it preceded Aug 1 2021, then used older gaslists
+    #     if ((20210427 - num_yr_mo_dd) > 0):
+    #         gaslist=[0, 104.25, 349.79, 552.9, 732.64, 999.51, 1487.06, 1994.25] #552.9 before 4/27
+    #     else:
+    #         gaslist=[0, 104.25, 349.79, 506.16, 732.64, 999.51, 1487.06, 1994.25]
+    # else:  # use newer gaslist if after Aug 1 2021
+    #     gaslist=[0, 104.25, 349.79, 494.72, 732.64, 999.51, 1487.06, 1961.39] #update in early Aug 2021
+    
+    # Added 3/29/2022
+    gaslist = get_gaslist()
     
     #add column for standard gas
     mask_EPOFF = data_df['State'].str.contains('EPOFF')
@@ -771,16 +774,19 @@ def parse_all_file_df_w_summary(filename):
 
     #Pascal, 8/13/2021, choose which gas list to use based upon time string from filename,
     #will need to update this to a more fully featured lookup later
-    time_str=re.search(r'\d{8}_\d{6}\.txt',filename)[0]  #grab 8 digits, underscore and 6 digits
-    year_month_day_str = re.split(r'_',time_str)[0]
-    num_yr_mo_dd = float(year_month_day_str)
-    if ( (20210801 - num_yr_mo_dd) > 0 ):  # if it preceded Aug 1 2021, then used older gaslists
-        if ((20210420 - num_yr_mo_dd) > 0):
-            gaslist=[0, 104.25, 349.79, 552.9, 732.64, 999.51, 1487.06, 1994.25] #552.9 before 4/27
-        else:
-            gaslist=[0, 104.25, 349.79, 506.16, 732.64, 999.51, 1487.06, 1994.25]
-    else:  # use newer gaslist if after Aug 1 2021
-        gaslist=[0, 104.25, 349.79, 494.72, 732.64, 999.51, 1487.06, 1961.39] #update in early Aug 2021
+    # time_str=re.search(r'\d{8}_\d{6}\.txt',filename)[0]  #grab 8 digits, underscore and 6 digits
+    # year_month_day_str = re.split(r'_',time_str)[0]
+    # num_yr_mo_dd = float(year_month_day_str)
+    # if ( (20210801 - num_yr_mo_dd) > 0 ):  # if it preceded Aug 1 2021, then used older gaslists
+    #     if ((20210420 - num_yr_mo_dd) > 0):
+    #         gaslist=[0, 104.25, 349.79, 552.9, 732.64, 999.51, 1487.06, 1994.25] #552.9 before 4/27
+    #     else:
+    #         gaslist=[0, 104.25, 349.79, 506.16, 732.64, 999.51, 1487.06, 1994.25]
+    # else:  # use newer gaslist if after Aug 1 2021
+    #     gaslist=[0, 104.25, 349.79, 494.72, 732.64, 999.51, 1487.06, 1961.39] #update in early Aug 2021
+    
+    # Added 3/29/2022
+    gaslist = get_gaslist()
     
     #add column for standard gas
     mask_EPOFF = data_df['State'].str.contains('EPOFF')
@@ -965,17 +971,20 @@ def parse_all_file_df_w_summary_v2(filename):
 
     #Pascal, 8/13/2021, choose which gas list to use based upon time string from filename,
     #will need to update this to a more fully featured lookup later
-    time_str=re.search(r'\d{8}_\d{6}\.txt',filename)[0]  #grab 8 digits, underscore and 6 digits
-    year_month_day_str = re.split(r'_',time_str)[0]
-    num_yr_mo_dd = float(year_month_day_str)
-    if ( (20210801 - num_yr_mo_dd) > 0 ):  # if it preceded Aug 1 2021, then used older gaslists
-        if ((20210420 - num_yr_mo_dd) > 0):
-            gaslist=[0, 104.25, 349.79, 552.9, 732.64, 999.51, 1487.06, 1994.25] #552.9 before 4/27
-        else:
-            gaslist=[0, 104.25, 349.79, 506.16, 732.64, 999.51, 1487.06, 1994.25]
-    else:  # use newer gaslist if after Aug 1 2021
-        gaslist=[0, 104.25, 349.79, 494.72, 732.64, 999.51, 1487.06, 1961.39] #update in early Aug 2021
+    # time_str=re.search(r'\d{8}_\d{6}\.txt',filename)[0]  #grab 8 digits, underscore and 6 digits
+    # year_month_day_str = re.split(r'_',time_str)[0]
+    # num_yr_mo_dd = float(year_month_day_str)
+    # if ( (20210801 - num_yr_mo_dd) > 0 ):  # if it preceded Aug 1 2021, then used older gaslists
+    #     if ((20210420 - num_yr_mo_dd) > 0):
+    #         gaslist=[0, 104.25, 349.79, 552.9, 732.64, 999.51, 1487.06, 1994.25] #552.9 before 4/27
+    #     else:
+    #         gaslist=[0, 104.25, 349.79, 506.16, 732.64, 999.51, 1487.06, 1994.25]
+    # else:  # use newer gaslist if after Aug 1 2021
+    #     gaslist=[0, 104.25, 349.79, 494.72, 732.64, 999.51, 1487.06, 1961.39] #update in early Aug 2021
     
+    # Added 3/29/2022
+    gaslist = get_gaslist()
+
     #add column for standard gas
     mask_EPOFF = data_df['State'].str.contains('EPOFF')
     df_epoff = data_df[mask_EPOFF]
@@ -1368,6 +1377,31 @@ def load_Val_File_into_dicts_v3(val_filename, timestamp_mode='ISO-8601 string'):
         d_by_time[time_str]=nested_dict
 
     return d_by_time, other_stuff, mode_and_gas_stuff, flush_stuff
+
+def get_gaslist(mode_and_gas_stuff=None):
+
+    # read in from referencegases.txt and cast to float
+    PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    referencegases_txt_filename = PROJECT_ROOT + '\\code\\referencegases.txt'
+    refgaslist = list(pd.read_csv(referencegases_txt_filename,\
+         skiprows=1).columns.values)
+    refgaslist = [float(x) for x in refgaslist]
+
+    # if avalable in code, get the gaslist from mode_and_gas_stuff
+    if mode_and_gas_stuff: 
+        gaslist_from_val_txt=[]
+        for k, v in mode_and_gas_stuff.items():
+            this_gas_val = v["EPOFF"]["Gas"]
+            if this_gas_val not in gaslist_from_val_txt:
+                gaslist_from_val_txt.append(this_gas_val)
+
+        # raise warning if they don't match
+        if ( gaslist_from_val_txt == refgaslist ):
+            pass
+        else:
+            raise Warning(f'referencegases.txt does not match data in validation text file')
+    
+    return refgaslist
 
 def val_df_make_residual_column(super_big_val_df):
     super_big_val_df['residual_ave'] = [np.NaN]*len(super_big_val_df)
@@ -2740,10 +2774,11 @@ if __name__ == '__main__':
     #validation_filename = './data/3CB942928/3CB942928_Validation_20210915-001423.txt'
     #validation_filename = './data/3CD6D1DD5/3CD6D1DD5_Validation_20211005-225409.txt'
     #validation_filename = './data/ASVTEST12_2022_03_03/ASVTEST12_VAL_20220303-003833.txt'
-    validation_filename = './data/ASVTEST12_2_samples/ASVTEST12_VAL_20220307-211254.txt'
+    #validation_filename = './data/ASVTEST12_2_samples/ASVTEST12_VAL_20220307-211254.txt'
+    validation_filename = '.\\data\\ASVTEST12\\ASVTEST12_VAL_20220325-220431.txt'
 
     #### Good stuff ####
-    path_to_data='./data/ASVTEST12_2_samples/'
+    path_to_data='./data/ASVTEST12/'
     path_to_ALL= path_to_data + 'ALL'
     filenames=glob.glob(path_to_ALL + '/2022*.txt')
     filenames.sort()
@@ -2798,7 +2833,7 @@ if __name__ == '__main__':
     super_big_stats_df = pd.concat(list_of_stats_df,axis=0,ignore_index=True)
     super_big_flags_df = pd.concat(list_of_flags_df,axis=0,ignore_index=True)
     super_big_coeff_sync_df = pd.concat(list_of_coeff_sync_df,axis=0,ignore_index=True)
-    super_big_df.to_csv(path_to_data + 'raw_w_summary_ASVTEST12_2_samples.csv', index=False)
+    super_big_df.to_csv(path_to_data + 'raw_w_summary_ASVTEST12_20220325_draft.csv', index=False)
     #### END Good stuff ####
 
     # pd.set_option('max_columns',None)
@@ -2812,4 +2847,4 @@ if __name__ == '__main__':
     # print(super_big_stats_df.describe(include='all'))
     # pd.reset_option('max_columns')
 
-    super_big_stats_df.to_csv(path_to_data + 'stats_ASVTEST12_2_samples.csv', index=False)
+    super_big_stats_df.to_csv(path_to_data + 'stats_ASVTEST12_20220325_draft.csv', index=False)

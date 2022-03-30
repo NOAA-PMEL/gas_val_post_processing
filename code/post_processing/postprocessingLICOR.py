@@ -424,6 +424,32 @@ def load_Val_File_into_dicts_v3(val_filename, timestamp_mode='ISO-8601 string'):
 
     return d_by_time, other_stuff, mode_and_gas_stuff, flush_stuff
 
+##### Special addition to avoid manual maintenance of gaslist #####
+def get_gaslist(mode_and_gas_stuff=None):
+
+    # read in from referencegases.txt and cast to float
+    PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    referencegases_txt_filename = PROJECT_ROOT + '\\code\\referencegases.txt'
+    refgaslist = list(pd.read_csv(referencegases_txt_filename,\
+         skiprows=1).columns.values)
+    refgaslist = [float(x) for x in refgaslist]
+
+    # if avalable in code, get the gaslist from mode_and_gas_stuff
+    if mode_and_gas_stuff: 
+        gaslist_from_val_txt=[]
+        for k, v in mode_and_gas_stuff.items():
+            this_gas_val = v["EPOFF"]["Gas"]
+            if this_gas_val not in gaslist_from_val_txt:
+                gaslist_from_val_txt.append(this_gas_val)
+
+        # raise warning if they don't match
+        if ( gaslist_from_val_txt == refgaslist ):
+            pass
+        else:
+            raise Warning(f'referencegases.txt does not match data in validation text file')
+    
+    return refgaslist
+
 def val_fix_nan_in_dict(bigDictionary):
     # It is expected that bigDictionary is a nested dictionary
     # with two keys referencing a list. Some of the entries of
@@ -602,25 +628,30 @@ def extra_range_checks(filename,validation_text_filename):
     
     #Pascal, 8/13/2021, choose which gas list to use based upon time string from filename,
     #will need to update this to a more fully featured lookup later
-    time_str=re.search(r'\d{8}_\d{6}\.txt',filename)[0]  #grab 8 digits, underscore and 6 digits
-    year_month_day_str = re.split(r'_',time_str)[0]
-    num_yr_mo_dd = float(year_month_day_str)
+    # time_str=re.search(r'\d{8}_\d{6}\.txt',filename)[0]  #grab 8 digits, underscore and 6 digits
+    # year_month_day_str = re.split(r'_',time_str)[0]
+    # num_yr_mo_dd = float(year_month_day_str)
+
     # if ( (20210801 - num_yr_mo_dd) > 0 ):  # if it preceded Aug 1 2021, then used older gaslist
     #     gaslist=[0, 104.25, 349.79, 506.16, 732.64, 999.51, 1487.06, 1994.25] #552.9 before 4/27
     # else:  # use newer gaslist if after Aug 1 2021
     #     gaslist=[0, 104.25, 349.79, 494.72, 732.64, 999.51, 1487.06, 1961.39] #update in early Aug 2021
-    if ( (20210801 - num_yr_mo_dd) > 0 ):  # if it preceded Aug 1 2021, then used older gaslists
-        if ((20210427 - num_yr_mo_dd) > 0):
-            span_gas = 552.9 #552.9 before 4/27
-        else:
-            span_gas = 506.16
-    else:  # use newer gaslist if after Aug 1 2021
-        span_gas = 494.72 #update in early Aug 2021
+    
+    # if ( (20210801 - num_yr_mo_dd) > 0 ):  # if it preceded Aug 1 2021, then used older gaslists
+    #     if ((20210427 - num_yr_mo_dd) > 0):
+    #         span_gas = 552.9 #552.9 before 4/27
+    #     else:
+    #         span_gas = 506.16
+    # else:  # use newer gaslist if after Aug 1 2021
+    #     span_gas = 494.72 #update in early Aug 2021
     
 
-    #### New stuff to avoid doing gaslist ####
+    #### New stuff to avoid doing gaslist manually ####
     bigDictionary, config_stuff, mode_and_gas_stuff, flush_stuff = \
         load_Val_File_into_dicts_v3(validation_text_filename)
+
+    k0 = list(mode_and_gas_stuff.keys())[0]
+    span_gas = mode_and_gas_stuff[k0]["SPOFF"]["Gas"]
 
     # bigDictionary, config_stuff, mode_and_gas_stuff, flush_stuff = \
     #     load_Val_File_into_dicts_v3(validation_text_filename,timestamp_mode='Unix epoch, days')
@@ -930,21 +961,26 @@ def postprocesslicorspan2_w_mode(filename_coeff, filename_data, span2_in, S1_lab
 
     #Pascal, 8/13/2021, choose which gas list to use based upon time string from filename,
     #will need to update this to a more fully featured lookup later
-    time_str=re.search(r'\d{8}_\d{6}\.txt',filename_data)[0]  #grab 8 digits, underscore and 6 digits
-    year_month_day_str = re.split(r'_',time_str)[0]
-    num_yr_mo_dd = float(year_month_day_str)
+    # time_str=re.search(r'\d{8}_\d{6}\.txt',filename_data)[0]  #grab 8 digits, underscore and 6 digits
+    # year_month_day_str = re.split(r'_',time_str)[0]
+    # num_yr_mo_dd = float(year_month_day_str)
+    
     # if ( (20210801 - num_yr_mo_dd) > 0 ):  # if it preceded Aug 1 2021, then used older gaslist
     #     gaslist=[0, 104.25, 349.79, 506.16, 732.64, 999.51, 1487.06, 1994.25] #552.9 before 4/27
     # else:  # use newer gaslist if after Aug 1 2021
     #     gaslist=[0, 104.25, 349.79, 494.72, 732.64, 999.51, 1487.06, 1961.39] #update in early Aug 2021
-    if ( (20210801 - num_yr_mo_dd) > 0 ):  # if it preceded Aug 1 2021, then used older gaslists
-        if ((20210427 - num_yr_mo_dd) > 0):
-            gaslist=[0, 104.25, 349.79, 552.9, 732.64, 999.51, 1487.06, 1994.25] #552.9 before 4/27
-        else:
-            gaslist=[0, 104.25, 349.79, 506.16, 732.64, 999.51, 1487.06, 1994.25]
-    else:  # use newer gaslist if after Aug 1 2021
-        gaslist=[0, 104.25, 349.79, 494.72, 732.64, 999.51, 1487.06, 1961.39] #update in early Aug 2021
-    
+
+    # if ( (20210801 - num_yr_mo_dd) > 0 ):  # if it preceded Aug 1 2021, then used older gaslists
+    #     if ((20210427 - num_yr_mo_dd) > 0):
+    #         gaslist=[0, 104.25, 349.79, 552.9, 732.64, 999.51, 1487.06, 1994.25] #552.9 before 4/27
+    #     else:
+    #         gaslist=[0, 104.25, 349.79, 506.16, 732.64, 999.51, 1487.06, 1994.25]
+    # else:  # use newer gaslist if after Aug 1 2021
+    #     gaslist=[0, 104.25, 349.79, 494.72, 732.64, 999.51, 1487.06, 1961.39] #update in early Aug 2021
+
+    # Added 3/29/2022
+    gaslist = get_gaslist()
+
     #add column for standard gas
     for i in range(len(df_res)):
         for gas in gaslist:
@@ -1304,6 +1340,10 @@ def plot_and_produce_report(sn,path_to_data,validation_text_filename):
     #plt.savefig(saveplotname_recalc_vs_no_recalc_EPOFF)  # Pascal, changed to png file
     fig2.savefig(saveplotname_recalc_vs_no_recalc_EPOFF)  # Pascal, changed to png file
 
+    #### close figures ####
+    fig1.close()
+    fig2.close()
+
     ###################### Dataframes for APOFF ################################
     df_830_830eq_avg_APOFF = df_830_830eq_APOFF.groupby('gas_standard').std_830recalc_res.agg(['mean','std'])
     df_830_830eq_avg_APOFF = df_830_830eq_avg_APOFF.reset_index()
@@ -1459,6 +1499,10 @@ def plot_and_produce_report(sn,path_to_data,validation_text_filename):
 
     fig3.savefig(saveplotname_APOFF_T_recalc, dpi=300) #change this filename
     fig4.savefig(saveplotname_EPOFF_T_recalc, dpi=300) #change this filename
+
+    #### cloose figures ####
+    fig3.close()
+    fig4.close()
 
     #################### Create a pdf report ##########################
     from create_a_pdf import generate_validation_report, generate_bigger_validation_report
@@ -2080,9 +2124,9 @@ if __name__ == "__main__":
     # sn = '1011'
     # path_to_data = './data/1011_2022_03_03/'
     # validation_text_filename = '.\\data\\1011_2022_03_03\\1011_VAL_20220303-003833.txt'
-    sn = '1011'
-    path_to_data = './data/1011_2_samples/'
-    validation_text_filename = '.\\data\\1011_2_samples\\1011_VAL_20220307-211254.txt'
+    # sn = '1011'
+    # path_to_data = './data/1011_2_samples/'
+    # validation_text_filename = '.\\data\\1011_2_samples\\1011_VAL_20220307-211254.txt'
 
     #### ASVTEST12 ####
     # sn = 'ASVTEST12'
@@ -2091,6 +2135,9 @@ if __name__ == "__main__":
     # sn = 'ASVTEST12'
     # path_to_data = './data/ASVTEST12_2_samples/'
     # validation_text_filename = '.\\data\\ASVTEST12_2_samples\\ASVTEST12_VAL_20220307-211254.txt'
+    sn = 'ASVTEST12'
+    path_to_data = './data/ASVTEST12/'
+    validation_text_filename = '.\\data\\ASVTEST12\\ASVTEST12_VAL_20220325-220431.txt'
 
     #### 3CA8A2535 ####
     # sn='3CA8A2535'
