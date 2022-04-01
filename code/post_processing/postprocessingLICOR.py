@@ -669,7 +669,7 @@ def extra_range_checks(filename,validation_text_filename):
     json.dump(bigDictionary, out, indent=4, ensure_ascii=False, allow_nan=True) 
     out.close()
 
-    pp.pprint(mode_and_gas_stuff)
+    #pp.pprint(mode_and_gas_stuff)
     out = open("mode_and_gas_parsed_from_val_file.json", "w")
     json.dump(mode_and_gas_stuff, out, indent=4, ensure_ascii=False, allow_nan=True) 
     out.close()
@@ -679,13 +679,13 @@ def extra_range_checks(filename,validation_text_filename):
     something_else = config_stuff[cskeys[0]]['LI_ser']
     print(f'type of LI_ser = {something}')
     print(f'LI_ser = {something_else}')
-    pp.pprint(config_stuff)
+    #pp.pprint(config_stuff)
     out = open("other_stuff_from_val_file.json", "w")
     json.dump(config_stuff, out, indent=4, ensure_ascii=False, allow_nan=True) 
     out.close()
 
     mgkeys = list(mode_and_gas_stuff.keys())
-    pp.pprint(mode_and_gas_stuff[mgkeys[0]])
+    #pp.pprint(mode_and_gas_stuff[mgkeys[0]])
     out = open("mode_and_gas_stuff_from_val_file.json", "w")
     json.dump(mode_and_gas_stuff, out, indent=4, ensure_ascii=False, allow_nan=True) 
     out.close()
@@ -1314,7 +1314,7 @@ def plot_and_produce_report(sn,path_to_data,validation_text_filename):
     #save plot as...
     saveplotname_recalc_vs_no_recalc_APOFF = figs_path + dir_sep + \
         'APOFF_' + sn + '_' + date_range[0][0:8] + '_T_recalc_vs_No_T_recalc.png'
-
+    #plt.show()
     #plt.savefig(saveplotname_recalc_vs_no_recalc_APOFF)  # Pascal, changed to png file
     fig1.savefig(saveplotname_recalc_vs_no_recalc_APOFF)  # Pascal, changed to png file
 
@@ -1338,11 +1338,12 @@ def plot_and_produce_report(sn,path_to_data,validation_text_filename):
     saveplotname_recalc_vs_no_recalc_EPOFF = figs_path + dir_sep + \
         'EPOFF_' + sn + '_' + date_range[0][0:8] + '_T_recalc_vs_No_T_recalc.png'
     #plt.savefig(saveplotname_recalc_vs_no_recalc_EPOFF)  # Pascal, changed to png file
+    #plt.show()
     fig2.savefig(saveplotname_recalc_vs_no_recalc_EPOFF)  # Pascal, changed to png file
 
     #### close figures ####
-    fig1.close()
-    fig2.close()
+    plt.close()
+    plt.close()
 
     ###################### Dataframes for APOFF ################################
     df_830_830eq_avg_APOFF = df_830_830eq_APOFF.groupby('gas_standard').std_830recalc_res.agg(['mean','std'])
@@ -1501,8 +1502,8 @@ def plot_and_produce_report(sn,path_to_data,validation_text_filename):
     fig4.savefig(saveplotname_EPOFF_T_recalc, dpi=300) #change this filename
 
     #### cloose figures ####
-    fig3.close()
-    fig4.close()
+    plt.close()
+    plt.close()
 
     #################### Create a pdf report ##########################
     from create_a_pdf import generate_validation_report, generate_bigger_validation_report
@@ -1572,12 +1573,30 @@ def plot_and_produce_report_w_extra_checks(sn,path_to_data,validation_text_filen
 
     #choose licor to get span 2 slope*********************
     #licorsernum = 'cga-5270'
-    ASVCO2sn2LICORsn = {'1004':'cga-5272', '1005': 'cga-5030','1006':'cga-5270',\
-    '1008':'cga-5176','1009':'cga-5178','3CA8A2533':'cga-5375','3CA8A2535':'cga-5353',\
-    '3CA8A2538':'cga-5379','3CADC7571':'cga-5354','3CADC7573':'cga-5177',\
-    '3CADC7565':'cga-5377','3CB942928':'cga-5378','XYXYXYXY':'cga-5378','3CB94292E':'cga-5380',\
-    '3CD6D1DD5':'cga-5376','3CD94292C':'cga-5352','1011':'cga-5180','ASVTEST12':'cga-5081'}
-    licorsernum = ASVCO2sn2LICORsn[sn]
+    # ASVCO2sn2LICORsn = {'1004':'cga-5272', '1005': 'cga-5030','1006':'cga-5270',\
+    # '1008':'cga-5176','1009':'cga-5178','3CA8A2533':'cga-5375','3CA8A2535':'cga-5353',\
+    # '3CA8A2538':'cga-5379','3CADC7571':'cga-5354','3CADC7573':'cga-5177',\
+    # '3CADC7565':'cga-5377','3CB942928':'cga-5378','XYXYXYXY':'cga-5378','3CB94292E':'cga-5380',\
+    # '3CD6D1DD5':'cga-5376','3CD94292C':'cga-5352','1011':'cga-5180','ASVTEST12':'cga-5081'}
+    # licorsernum = ASVCO2sn2LICORsn[sn]
+
+    #### New stuff to avoid doing licorsernum manually ####
+    bigDictionary, config_stuff, mode_and_gas_stuff, flush_stuff = \
+        load_Val_File_into_dicts_v3(validation_text_filename)
+
+    # convert licorsernum with CGA-XXXX to lowercase cga-XXXX, where XXXX represents digits
+    k0 = list(config_stuff.keys())[0]
+    licorsernum_upper = config_stuff[k0]["LI_ser"]
+    m = re.match(r'\s*(\w+)-(\d+)',licorsernum_upper)  
+    if ( m and len(m.groups()) == 2 ):
+        letters = m.groups()[0]
+        numbers = m.groups()[1]
+        # need to swap from uppercase to lower case for csv file lookup
+        if ( letters.isupper() ):  
+            letters = letters.lower()
+        licorsernum = letters + '-' + numbers
+    else:
+        raise Exception(f'Unexpected serialnumber found {licorsernum_upper}')
 
     #choose 1st or 2nd cal for slope
     # calnum = slope_cal_1  # older choice, dates back to code from Sophie on May 17th, 2021
@@ -1832,6 +1851,10 @@ def plot_and_produce_report_w_extra_checks(sn,path_to_data,validation_text_filen
     #plt.savefig(saveplotname_recalc_vs_no_recalc_EPOFF)  # Pascal, changed to png file
     fig2.savefig(saveplotname_recalc_vs_no_recalc_EPOFF)  # Pascal, changed to png file
 
+    #### close figures ####
+    plt.close()
+    plt.close()
+
     ###################### Dataframes for APOFF ################################
     df_830_830eq_avg_APOFF = df_830_830eq_APOFF.groupby('gas_standard').std_830recalc_res.agg(['mean','std'])
     df_830_830eq_avg_APOFF = df_830_830eq_avg_APOFF.reset_index()
@@ -1990,6 +2013,10 @@ def plot_and_produce_report_w_extra_checks(sn,path_to_data,validation_text_filen
     fig3.savefig(saveplotname_APOFF_T_recalc, dpi=300) #change this filename
     fig4.savefig(saveplotname_EPOFF_T_recalc, dpi=300) #change this filename
 
+    #### close figures ####
+    plt.close()
+    plt.close()
+
     #################### Create a pdf report ##########################
     from create_a_pdf_dry import generate_validation_report, generate_bigger_validation_report
     from create_a_pdf_dry import generate_bigger_validation_report_reordered
@@ -2127,6 +2154,9 @@ if __name__ == "__main__":
     # sn = '1011'
     # path_to_data = './data/1011_2_samples/'
     # validation_text_filename = '.\\data\\1011_2_samples\\1011_VAL_20220307-211254.txt'
+    sn0 = '1011'
+    path_to_data0 = './data/1011/'
+    validation_text_filename0 = '.\\data\\1011\\1011_VAL_20220325-220431.txt'
 
     #### ASVTEST12 ####
     # sn = 'ASVTEST12'
@@ -2135,9 +2165,9 @@ if __name__ == "__main__":
     # sn = 'ASVTEST12'
     # path_to_data = './data/ASVTEST12_2_samples/'
     # validation_text_filename = '.\\data\\ASVTEST12_2_samples\\ASVTEST12_VAL_20220307-211254.txt'
-    sn = 'ASVTEST12'
-    path_to_data = './data/ASVTEST12/'
-    validation_text_filename = '.\\data\\ASVTEST12\\ASVTEST12_VAL_20220325-220431.txt'
+    sn1 = 'ASVTEST12'
+    path_to_data1 = './data/ASVTEST12/'
+    validation_text_filename1 = '.\\data\\ASVTEST12\\ASVTEST12_VAL_20220325-220431.txt'
 
     #### 3CA8A2535 ####
     # sn='3CA8A2535'
@@ -2206,6 +2236,12 @@ if __name__ == "__main__":
     #validation_text_filename = '.\\data\\ASV1011\\Validation\\ASV1011_VAL_20220203-001104.txt'
 
     # New feature in 9/21/2021
-    plot_and_produce_report_w_extra_checks(sn,path_to_data,validation_text_filename)
+    # plot_and_produce_report_w_extra_checks(sn,path_to_data,validation_text_filename)
+
+    # New feature in 9/21/2021
+    plot_and_produce_report_w_extra_checks(sn0,path_to_data0,validation_text_filename0)
+
+    # New feature in 9/21/2021
+    plot_and_produce_report_w_extra_checks(sn1,path_to_data1,validation_text_filename1)
 
     #print(extra_range_checks('./data/XYXYXYXY/ALL/20210914_180017.txt'))
